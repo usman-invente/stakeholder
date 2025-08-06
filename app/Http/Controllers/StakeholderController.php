@@ -20,6 +20,20 @@ class StakeholderController extends Controller
 
     public function store(Request $request)
     {
+        $messages = [
+            'name.required' => 'The stakeholder name is required.',
+            'name.max' => 'The stakeholder name cannot exceed 255 characters.',
+            'email.required' => 'The email address is required.',
+            'email.email' => 'Please enter a valid email address.',
+            'email.unique' => 'This email address is already registered.',
+            'phone.max' => 'The phone number cannot exceed 20 characters.',
+            'organization.required' => 'The organization name is required.',
+            'organization.max' => 'The organization name cannot exceed 255 characters.',
+            'position.max' => 'The position cannot exceed 255 characters.',
+            'type.required' => 'Please select a stakeholder type.',
+            'type.in' => 'Please select either Internal or External type.'
+        ];
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:stakeholders',
@@ -29,7 +43,7 @@ class StakeholderController extends Controller
             'address' => 'nullable|string',
             'type' => 'required|in:internal,external',
             'notes' => 'nullable|string'
-        ]);
+        ], $messages);
 
         Stakeholder::create($validated);
 
@@ -49,6 +63,20 @@ class StakeholderController extends Controller
 
     public function update(Request $request, Stakeholder $stakeholder)
     {
+        $messages = [
+            'name.required' => 'The stakeholder name is required.',
+            'name.max' => 'The stakeholder name cannot exceed 255 characters.',
+            'email.required' => 'The email address is required.',
+            'email.email' => 'Please enter a valid email address.',
+            'email.unique' => 'This email address is already registered.',
+            'phone.max' => 'The phone number cannot exceed 20 characters.',
+            'organization.required' => 'The organization name is required.',
+            'organization.max' => 'The organization name cannot exceed 255 characters.',
+            'position.max' => 'The position cannot exceed 255 characters.',
+            'type.required' => 'Please select a stakeholder type.',
+            'type.in' => 'Please select either Internal or External type.'
+        ];
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:stakeholders,email,' . $stakeholder->id,
@@ -58,7 +86,7 @@ class StakeholderController extends Controller
             'address' => 'nullable|string',
             'type' => 'required|in:internal,external',
             'notes' => 'nullable|string'
-        ]);
+        ], $messages);
 
         $stakeholder->update($validated);
 
