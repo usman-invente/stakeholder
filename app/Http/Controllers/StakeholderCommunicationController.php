@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\StakeholderCommunication;
 use App\Models\Stakeholder;
+use App\Exports\StakeholderCommunicationsExport;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class StakeholderCommunicationController extends Controller
 {
@@ -98,5 +100,42 @@ class StakeholderCommunicationController extends Controller
         $communication->delete();
         return redirect()->route('stakeholder-communications.index', $stakeholder)
             ->with('success', 'Communication record deleted successfully.');
+    }
+
+    public function report(Request $request)
+    {
+        $query = StakeholderCommunication::with(['stakeholder', 'users']);
+
+        // If no date range is selected, default to showing the last 12 months
+        if (!$request->filled('start_date') && !$request->filled('end_date')) {
+            $query->whereDate('meeting_date', '>=', now()->subMonths(12));
+        } else {
+            if ($request->filled('start_date')) {
+                $query->whereDate('meeting_date', '>=', $request->start_date);
+            }
+            if ($request->filled('end_date')) {
+                $query->whereDate('meeting_date', '<=', $request->end_date);
+            }
+        }
+
+        $communications = $query->orderBy('meeting_date', 'desc') // Show latest months first
+                               ->orderBy('meeting_time', 'asc')
+                               ->paginate(15)
+                               ->withQueryString();
+
+        return view('stakeholder-communications.report', compact('communications'));
+    }
+
+    public function export(Request $request)
+    {
+        $export = new StakeholderCommunicationsExport();
+        $export->setDateRange($request->start_date, $request->end_date);
+        
+        $filename = 'stakeholder-communications-' . now()->format('Y-m-d');
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $filename = 'stakeholder-communications-' . $request->start_date . '-to-' . $request->end_date;
+        }
+        
+        return Excel::download($export, $filename . '.xlsx');
     }
 }

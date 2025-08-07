@@ -27,6 +27,10 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('stakeholders', StakeholderController::class);
     
     // Stakeholder Communications routes
+    Route::get('communications/report', [StakeholderCommunicationController::class, 'report'])
+        ->name('stakeholder-communications.report');
+    Route::get('communications/export', [StakeholderCommunicationController::class, 'export'])
+        ->name('stakeholder-communications.export');
     Route::get('stakeholders/{stakeholder}/communications', [StakeholderCommunicationController::class, 'index'])
         ->name('stakeholder-communications.index');
     Route::get('stakeholders/{stakeholder}/communications/create', [StakeholderCommunicationController::class, 'create'])
