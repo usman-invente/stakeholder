@@ -24,4 +24,9 @@ class Stakeholder extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
+    public function communications()
+    {
+        return $this->hasMany(StakeholderCommunication::class);
+    }
 }

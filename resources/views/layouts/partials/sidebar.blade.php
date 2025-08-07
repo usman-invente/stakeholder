@@ -22,7 +22,12 @@
 </div>
 
 <script>
-document.getElementById('sidebar-toggle').addEventListener('click', function() {
-    document.querySelector('.bg-dark').classList.toggle('d-none');
+document.addEventListener('DOMContentLoaded', function() {
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', function() {
+            document.querySelector('.bg-dark').classList.toggle('d-none');
+        });
+    }
 });
 </script>
