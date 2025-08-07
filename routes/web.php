@@ -5,30 +5,38 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\StakeholderController;
 use App\Http\Controllers\StakeholderCommunicationController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\ActivityLogController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Middleware\AdminMiddleware;
 Route::get('/', function () {
-    return view('welcome');
+    return view('auth.login');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth'])->name('dashboard');
+Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])
+    ->middleware(['auth'])
+    ->name('dashboard');
 
 Route::middleware(['auth'])->group(function () {
+    // Profile routes
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     
-
-        Route::get('/settings', [SettingController::class, 'index'])->name('settings.index')->middleware(AdminMiddleware::class);
-        Route::put('/settings', [SettingController::class, 'update'])->name('settings.update')->middleware(AdminMiddleware::class);
-
-
-    // User routes
+    // Admin routes
+    Route::middleware(['admin'])->group(function () {
+        // Settings routes
+        Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
+        Route::put('/settings', [SettingController::class, 'update'])->name('settings.update');
+        
+       
+        
+        
+        // Activity log routes
+        Route::get('activity-log', [ActivityLogController::class, 'index'])->name('activity-log.index');
+    });
+     // User management routes
     Route::resource('users', UserController::class);
-    
     // Stakeholder routes
     Route::resource('stakeholders', StakeholderController::class);
     

@@ -12,20 +12,27 @@
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="fas fa-user"></i> {{ Auth::user()->name ?? 'User' }}
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                        <li><a class="dropdown-item" href="{{ route('profile.edit') }}"><i class="fas fa-user-cog"></i> Profile</a></li>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="navbarDropdown">
+                      
+                        
                         @if(Auth::user()->role === 'admin')
-                            <li><a class="dropdown-item" href="{{ route('settings.index') }}"><i class="fas fa-cogs"></i> System Settings</a></li>
+                            <li>
+                                <a class="dropdown-item py-2" href="{{ route('settings.index') }}">
+                                    <i class="fas fa-cogs me-2"></i> System Settings
+                                </a>
+                            </li>
+                           
+                           
                         @endif
-                        <li><hr class="dropdown-divider"></li>
+                        
+                        <li><hr class="dropdown-divider my-2"></li>
+                        
                         <li>
-                            <a class="dropdown-item" href="{{ route('logout') }}"
-                               onclick="event.preventDefault();
-                                             document.getElementById('logout-form').submit();">
-                                <i class="fas fa-sign-out-alt"></i> {{ __('Logout') }}
-                            </a>
-                            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                            <form action="{{ route('logout') }}" method="POST">
                                 @csrf
+                                <button type="submit" class="dropdown-item py-2 text-danger">
+                                    <i class="fas fa-sign-out-alt me-2"></i> {{ __('Logout') }}
+                                </button>
                             </form>
                         </li>
                     </ul>
