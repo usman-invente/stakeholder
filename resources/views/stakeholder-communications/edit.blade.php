@@ -4,6 +4,8 @@
 
 @push('styles')
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
 @endpush
 
 @section('content')
@@ -119,6 +121,27 @@
                             </div>
                         </div>
 
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="users">Assigned Users <span class="text-danger">*</span></label>
+                                    <select name="users[]" id="users" class="form-control @error('users') is-invalid @enderror" multiple>
+                                        @foreach($users as $user)
+                                            <option value="{{ $user->id }}" 
+                                                {{ (is_array(old('users', $communication->users->pluck('id')->toArray())) && 
+                                                    in_array($user->id, old('users', $communication->users->pluck('id')->toArray()))) ? 'selected' : '' }}>
+                                                {{ $user->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('users')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <small class="text-muted">Hold Ctrl/Cmd to select multiple users</small>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="d-flex justify-content-between mt-3">
                             <a href="{{ url('stakeholders/'.$stakeholder->id.'/communications') }}" class="btn btn-secondary">
                                 <i class="fas fa-arrow-left"></i> Back
@@ -137,6 +160,7 @@
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize flatpickr for meeting date and time
@@ -182,6 +206,12 @@ document.addEventListener('DOMContentLoaded', function() {
         allowInput: true,
         defaultDate: "{{ $communication->follow_up_date?->format('Y-m-d') }}",
         placeholder: "Select Follow-up Date"
+    });
+
+    // Initialize Select2
+    $('#users').select2({
+        placeholder: 'Select users',
+        allowClear: true
     });
 });
 </script>

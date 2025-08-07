@@ -60,7 +60,11 @@ class StakeholderCommunicationController extends Controller
 
     public function edit(Stakeholder $stakeholder, StakeholderCommunication $communication)
     {
-        return view('stakeholder-communications.edit', compact('stakeholder', 'communication'));
+        $users = \App\Models\User::where('role', '!=', 'admin')
+            ->orderBy('name')
+            ->get();
+    
+        return view('stakeholder-communications.edit', compact('stakeholder', 'communication', 'users'));
     }
 
     public function update(Request $request, Stakeholder $stakeholder, StakeholderCommunication $communication)
@@ -74,10 +78,16 @@ class StakeholderCommunicationController extends Controller
             'discussion_points' => 'required|string',
             'action_items' => 'nullable|string',
             'follow_up_notes' => 'nullable|string',
-            'follow_up_date' => 'nullable|date|after:meeting_date'
+            'follow_up_date' => 'nullable|date|after:meeting_date',
+            'users' => 'required|array|min:1',
+            'users.*' => 'exists:users,id'
         ]);
 
+        $users = $validated['users'];
+        unset($validated['users']);
+
         $communication->update($validated);
+        $communication->users()->sync($users);
 
         return redirect()->route('stakeholder-communications.index', $stakeholder)
             ->with('success', 'Communication record updated successfully.');
