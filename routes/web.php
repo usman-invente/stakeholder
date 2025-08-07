@@ -4,9 +4,10 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\StakeholderController;
 use App\Http\Controllers\StakeholderCommunicationController;
+use App\Http\Controllers\SettingController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
-
+use App\Http\Middleware\AdminMiddleware;
 Route::get('/', function () {
     return view('welcome');
 });
@@ -20,6 +21,11 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     
+
+        Route::get('/settings', [SettingController::class, 'index'])->name('settings.index')->middleware(AdminMiddleware::class);
+        Route::put('/settings', [SettingController::class, 'update'])->name('settings.update')->middleware(AdminMiddleware::class);
+
+
     // User routes
     Route::resource('users', UserController::class);
     

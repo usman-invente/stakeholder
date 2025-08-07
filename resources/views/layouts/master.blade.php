@@ -36,6 +36,25 @@
     <!-- Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize all dropdowns
+            var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'));
+            var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
+                return new bootstrap.Dropdown(dropdownToggleEl);
+            });
+
+            // Add hover functionality to dropdowns
+            $('.nav-item.dropdown').hover(
+                function() {
+                    $(this).find('.dropdown-menu').first().stop(true, true).delay(250).slideDown();
+                },
+                function() {
+                    $(this).find('.dropdown-menu').first().stop(true, true).delay(100).slideUp();
+                }
+            );
+        });
+    </script>
     @stack('scripts')
 </body>
 </html>
