@@ -4,18 +4,27 @@ namespace App\Http\Controllers;
 
 use App\Models\Stakeholder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class StakeholderController extends Controller
 {
     public function index()
     {
-        $stakeholders = Stakeholder::paginate(10);
+        if (Auth::user()->role === 'admin') {
+            // Admin sees all stakeholders
+            $stakeholders = Stakeholder::paginate(10);
+        } else {
+            // Regular user sees only assigned stakeholders
+            $stakeholders = Auth::user()->stakeholders()->paginate(10);
+        }
+        
         return view('stakeholders.index', compact('stakeholders'));
     }
 
     public function create()
     {
-        return view('stakeholders.create');
+        $users = \App\Models\User::where('role', 'user')->get();
+        return view('stakeholders.create', compact('users'));
     }
 
     public function store(Request $request)
@@ -42,10 +51,17 @@ class StakeholderController extends Controller
             'position' => 'nullable|string|max:255',
             'address' => 'nullable|string',
             'type' => 'required|in:internal,external',
-            'notes' => 'nullable|string'
+            'notes' => 'nullable|string',
+            'users' => 'nullable|array',
+            'users.*' => 'exists:users,id'
         ], $messages);
 
-        Stakeholder::create($validated);
+        $stakeholder = Stakeholder::create($validated);
+        
+        // Attach users if selected
+        if ($request->has('users')) {
+            $stakeholder->users()->attach($request->users);
+        }
 
         return redirect()->route('stakeholders.index')
             ->with('success', 'Stakeholder created successfully.');
@@ -58,7 +74,9 @@ class StakeholderController extends Controller
 
     public function edit(Stakeholder $stakeholder)
     {
-        return view('stakeholders.edit', compact('stakeholder'));
+        $users = \App\Models\User::where('role', 'user')->get();
+        $assignedUsers = $stakeholder->users->pluck('id')->toArray();
+        return view('stakeholders.edit', compact('stakeholder', 'users', 'assignedUsers'));
     }
 
     public function update(Request $request, Stakeholder $stakeholder)
@@ -85,10 +103,19 @@ class StakeholderController extends Controller
             'position' => 'nullable|string|max:255',
             'address' => 'nullable|string',
             'type' => 'required|in:internal,external',
-            'notes' => 'nullable|string'
+            'notes' => 'nullable|string',
+            'users' => 'nullable|array',
+            'users.*' => 'exists:users,id'
         ], $messages);
 
         $stakeholder->update($validated);
+        
+        // Sync users
+        if ($request->has('users')) {
+            $stakeholder->users()->sync($request->users);
+        } else {
+            $stakeholder->users()->detach();
+        }
 
         return redirect()->route('stakeholders.index')
             ->with('success', 'Stakeholder updated successfully.');

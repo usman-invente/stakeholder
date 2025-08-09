@@ -51,4 +51,11 @@ class User extends Authenticatable
         return $this->belongsToMany(StakeholderCommunication::class, 'stakeholder_communication_users', 'user_id', 'stakeholder_communication_id')
             ->withTimestamps();
     }
+    
+    // Add relationship to get assigned stakeholders
+    public function stakeholders()
+    {
+        return $this->belongsToMany(Stakeholder::class, 'stakeholder_users', 'user_id', 'stakeholder_id')
+            ->withTimestamps();
+    }
 }

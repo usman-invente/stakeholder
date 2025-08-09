@@ -2,6 +2,48 @@
 
 @section('title', 'Stakeholder Communications Report')
 
+@push('styles')
+<style>
+    /* Mobile-friendly styles for date inputs */
+    input[type="date"] {
+        -webkit-appearance: none;
+        appearance: none;
+        padding: 8px 12px;
+        font-size: 16px; /* Prevents iOS zoom on focus */
+        line-height: 1.5;
+        width: 100%;
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+        background-color: #fff;
+    }
+    
+    /* Calendar icon styling */
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        width: 20px;
+        height: 20px;
+        margin-left: 0.5rem;
+        cursor: pointer;
+    }
+    
+    /* Ensure form elements have proper spacing */
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    
+    /* Better button sizing on mobile */
+    @media (max-width: 576px) {
+        .btn {
+            padding: .375rem .5rem;
+            font-size: .875rem;
+        }
+        
+        input[type="date"] {
+            padding: 10px 8px;
+        }
+    }
+</style>
+@endpush
+
 @section('content')
 <div class="container-fluid">
     <div class="row">
@@ -18,27 +60,25 @@
 
                 <div class="card-body">
                     <form action="{{ route('stakeholder-communications.report') }}" method="GET" class="mb-4">
-                        <div class="row">
-                            <div class="col-md-4">
+                        <div class="row g-3">
+                            <div class="col-12 col-sm-6 col-md-4">
                                 <div class="form-group">
                                     <label for="start_date">Start Date</label>
-                                    <input type="text" class="form-control flatpickr" id="start_date" name="start_date" 
-                                        value="{{ request('start_date', now()->subMonths(12)->format('Y-m-d')) }}" 
-                                        placeholder="Select start date">
+                                    <input type="date" class="form-control" id="start_date" name="start_date" 
+                                        value="{{ request('start_date', now()->subMonths(12)->format('Y-m-d')) }}">
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-12 col-sm-6 col-md-4">
                                 <div class="form-group">
                                     <label for="end_date">End Date</label>
-                                    <input type="text" class="form-control flatpickr" id="end_date" name="end_date" 
-                                        value="{{ request('end_date', now()->format('Y-m-d')) }}" 
-                                        placeholder="Select end date">
+                                    <input type="date" class="form-control" id="end_date" name="end_date" 
+                                        value="{{ request('end_date', now()->format('Y-m-d')) }}">
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-12 col-md-4">
                                 <div class="form-group">
-                                    <label class="invisible">Actions</label>
-                                    <div class="d-flex align-items-center">
+                                    <label class="d-none d-md-block invisible">Actions</label>
+                                    <div class="d-flex align-items-center mt-2 mt-md-0">
                                         <button type="submit" class="btn btn-primary me-2">
                                             <i class="fas fa-filter"></i> Filter
                                         </button>
@@ -73,9 +113,16 @@
                                 @endphp
                                 @foreach($communications as $communication)
                                     @php
-                                        $monthYear = $communication->meeting_date->format('F Y');
-                                        $meetingTime = \Carbon\Carbon::createFromFormat('H:i:s', $communication->meeting_time);
-                                        $formattedTime = $meetingTime->format('h:i A'); // 12-hour format with AM/PM
+                                        $meetingDate = \Carbon\Carbon::parse($communication->meeting_date);
+                                        $monthYear = $meetingDate->format('F Y');
+                                        
+                                        // Safely format the time
+                                        try {
+                                            $meetingTime = \Carbon\Carbon::parse($communication->meeting_time);
+                                            $formattedTime = $meetingTime->format('h:i A'); // 12-hour format with AM/PM
+                                        } catch (\Exception $e) {
+                                            $formattedTime = $communication->meeting_time;
+                                        }
                                     @endphp
 
                                     @if($currentMonth !== $monthYear)
@@ -92,14 +139,14 @@
                                     <tr>
                                         <td>{{ $communication->id }}</td>
                                         <td>{{ $communication->stakeholder->name }}</td>
-                                        <td>{{ $communication->meeting_date->format('Y-m-d') }}</td>
+                                        <td>{{ $meetingDate->format('Y-m-d') }}</td>
                                         <td>{{ $formattedTime }}</td>
                                         <td>{{ ucfirst($communication->meeting_type) }}</td>
                                         <td>{{ $communication->location }}</td>
                                         <td>{{ Str::limit($communication->attendees, 50) }}</td>
                                         <td>{{ Str::limit($communication->discussion_points, 50) }}</td>
                                         <td>{{ Str::limit($communication->action_items, 50) }}</td>
-                                        <td>{{ $communication->follow_up_date ? $communication->follow_up_date->format('Y-m-d') : '-' }}</td>
+                                        <td>{{ $communication->follow_up_date ? \Carbon\Carbon::parse($communication->follow_up_date)->format('Y-m-d') : '-' }}</td>
                                         <td>{{ $communication->users->pluck('name')->implode(', ') }}</td>
                                     </tr>
                                 @endforeach
@@ -120,10 +167,39 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize flatpickr for date inputs
-    flatpickr(".flatpickr", {
-        dateFormat: "Y-m-d",
-        allowInput: true,
+    // Function to check if the device is mobile/tablet
+    function isMobileOrTablet() {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+    }
+    
+    // On mobile/tablet, use native date picker
+    if (!isMobileOrTablet()) {
+        // Only use flatpickr on desktop
+        flatpickr("#start_date, #end_date", {
+            dateFormat: "Y-m-d",
+            allowInput: true
+        });
+    }
+    
+    // Make sure the date inputs are in the right format
+    const dateInputs = document.querySelectorAll('input[type="date"]');
+    dateInputs.forEach(input => {
+        // Ensure the date value is in the format expected by the input
+        if (input.value) {
+            try {
+                const date = new Date(input.value);
+                if (!isNaN(date.getTime())) {
+                    const formattedDate = date.toISOString().split('T')[0];
+                    input.value = formattedDate;
+                }
+            } catch (e) {
+                console.error('Error formatting date:', e);
+            }
+        }
+        
+        // Add extra styling for better mobile appearance
+        input.style.paddingRight = '10px';
+        input.style.paddingLeft = '10px';
     });
 });
 </script>

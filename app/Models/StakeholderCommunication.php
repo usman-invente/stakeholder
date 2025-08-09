@@ -25,9 +25,34 @@ class StakeholderCommunication extends Model
     ];
 
     protected $casts = [
-        'meeting_date' => 'date',
-        'follow_up_date' => 'date',
+        'meeting_date' => 'datetime',
+        'follow_up_date' => 'datetime',
+        'meeting_time' => 'datetime',
     ];
+
+    public function getMeetingDateTimeAttribute()
+    {
+        if ($this->meeting_date && $this->meeting_time) {
+            return \Carbon\Carbon::parse($this->meeting_date->format('Y-m-d') . ' ' . $this->meeting_time->format('H:i:s'))
+                ->setTimezone('Africa/Dar_es_Salaam');
+        }
+        return null;
+    }
+
+    public function getFormattedMeetingDateAttribute()
+    {
+        return $this->meeting_date ? $this->meeting_date->setTimezone('Africa/Dar_es_Salaam')->format('M d, Y') : null;
+    }
+
+    public function getFormattedMeetingTimeAttribute()
+    {
+        return $this->meeting_time ? $this->meeting_time->setTimezone('Africa/Dar_es_Salaam')->format('h:i A') : null;
+    }
+
+    public function getFormattedFollowUpDateAttribute()
+    {
+        return $this->follow_up_date ? $this->follow_up_date->setTimezone('Africa/Dar_es_Salaam')->format('M d, Y') : null;
+    }
 
     public function stakeholder(): BelongsTo
     {

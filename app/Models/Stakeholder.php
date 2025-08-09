@@ -29,4 +29,11 @@ class Stakeholder extends Model
     {
         return $this->hasMany(StakeholderCommunication::class);
     }
+    
+    // Relationship with users who are assigned to this stakeholder
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'stakeholder_users', 'stakeholder_id', 'user_id')
+            ->withTimestamps();
+    }
 }

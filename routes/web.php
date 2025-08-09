@@ -29,36 +29,37 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
         Route::put('/settings', [SettingController::class, 'update'])->name('settings.update');
         
-       
-        
+        // User management routes
+        Route::resource('users', UserController::class);
         
         // Activity log routes
         Route::get('activity-log', [ActivityLogController::class, 'index'])->name('activity-log.index');
     });
-     // User management routes
-    Route::resource('users', UserController::class);
-    // Stakeholder routes
-    Route::resource('stakeholders', StakeholderController::class);
     
-    // Stakeholder Communications routes
-    Route::get('communications/report', [StakeholderCommunicationController::class, 'report'])
-        ->name('stakeholder-communications.report');
-    Route::get('communications/export', [StakeholderCommunicationController::class, 'export'])
-        ->name('stakeholder-communications.export');
-    Route::get('stakeholders/{stakeholder}/communications', [StakeholderCommunicationController::class, 'index'])
-        ->name('stakeholder-communications.index');
-    Route::get('stakeholders/{stakeholder}/communications/create', [StakeholderCommunicationController::class, 'create'])
-        ->name('stakeholder-communications.create');
-    Route::post('stakeholders/{stakeholder}/communications', [StakeholderCommunicationController::class, 'store'])
-        ->name('stakeholder-communications.store');
-    Route::get('stakeholders/{stakeholder}/communications/{communication}', [StakeholderCommunicationController::class, 'show'])
-        ->name('stakeholder-communications.show');
-    Route::get('stakeholders/{stakeholder}/communications/{communication}/edit', [StakeholderCommunicationController::class, 'edit'])
-        ->name('stakeholder-communications.edit');
-    Route::put('stakeholders/{stakeholder}/communications/{communication}', [StakeholderCommunicationController::class, 'update'])
-        ->name('stakeholder-communications.update');
-    Route::delete('stakeholders/{stakeholder}/communications/{communication}', [StakeholderCommunicationController::class, 'destroy'])
-        ->name('stakeholder-communications.destroy');
+    // Stakeholder routes - accessible to both admin and regular users
+    Route::middleware(['auth'])->group(function () {
+        Route::resource('stakeholders', StakeholderController::class);
+        
+        // Stakeholder Communications routes
+        Route::get('communications/report', [StakeholderCommunicationController::class, 'report'])
+            ->name('stakeholder-communications.report');
+        Route::get('communications/export', [StakeholderCommunicationController::class, 'export'])
+            ->name('stakeholder-communications.export');
+        Route::get('stakeholders/{stakeholder}/communications', [StakeholderCommunicationController::class, 'index'])
+            ->name('stakeholder-communications.index');
+        Route::get('stakeholders/{stakeholder}/communications/create', [StakeholderCommunicationController::class, 'create'])
+            ->name('stakeholder-communications.create');
+        Route::post('stakeholders/{stakeholder}/communications', [StakeholderCommunicationController::class, 'store'])
+            ->name('stakeholder-communications.store');
+        Route::get('stakeholders/{stakeholder}/communications/{communication}', [StakeholderCommunicationController::class, 'show'])
+            ->name('stakeholder-communications.show');
+        Route::get('stakeholders/{stakeholder}/communications/{communication}/edit', [StakeholderCommunicationController::class, 'edit'])
+            ->name('stakeholder-communications.edit');
+        Route::put('stakeholders/{stakeholder}/communications/{communication}', [StakeholderCommunicationController::class, 'update'])
+            ->name('stakeholder-communications.update');
+        Route::delete('stakeholders/{stakeholder}/communications/{communication}', [StakeholderCommunicationController::class, 'destroy'])
+            ->name('stakeholder-communications.destroy');
+    });
 });
 
 require __DIR__.'/auth.php';

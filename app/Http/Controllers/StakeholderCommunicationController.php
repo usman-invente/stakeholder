@@ -41,6 +41,22 @@ class StakeholderCommunicationController extends Controller
             'users.*' => 'exists:users,id'
         ]);
 
+        // Convert time to UTC for storage
+        if ($validated['meeting_time']) {
+            $meetingTime = \Carbon\Carbon::parse($validated['meeting_time'], 'Africa/Dar_es_Salaam');
+            $validated['meeting_time'] = $meetingTime->setTimezone('UTC')->format('H:i:s');
+        }
+
+        if ($validated['meeting_date']) {
+            $meetingDate = \Carbon\Carbon::parse($validated['meeting_date'], 'Africa/Dar_es_Salaam');
+            $validated['meeting_date'] = $meetingDate->setTimezone('UTC')->format('Y-m-d');
+        }
+
+        if (!empty($validated['follow_up_date'])) {
+            $followUpDate = \Carbon\Carbon::parse($validated['follow_up_date'], 'Africa/Dar_es_Salaam');
+            $validated['follow_up_date'] = $followUpDate->setTimezone('UTC')->format('Y-m-d');
+        }
+
         $users = $validated['users'];
         unset($validated['users']);
 
@@ -84,6 +100,22 @@ class StakeholderCommunicationController extends Controller
             'users' => 'required|array|min:1',
             'users.*' => 'exists:users,id'
         ]);
+
+        // Convert time to UTC for storage
+        if ($validated['meeting_time']) {
+            $meetingTime = \Carbon\Carbon::parse($validated['meeting_time'], 'Africa/Dar_es_Salaam');
+            $validated['meeting_time'] = $meetingTime->setTimezone('UTC')->format('H:i:s');
+        }
+
+        if ($validated['meeting_date']) {
+            $meetingDate = \Carbon\Carbon::parse($validated['meeting_date'], 'Africa/Dar_es_Salaam');
+            $validated['meeting_date'] = $meetingDate->setTimezone('UTC')->format('Y-m-d');
+        }
+
+        if (!empty($validated['follow_up_date'])) {
+            $followUpDate = \Carbon\Carbon::parse($validated['follow_up_date'], 'Africa/Dar_es_Salaam');
+            $validated['follow_up_date'] = $followUpDate->setTimezone('UTC')->format('Y-m-d');
+        }
 
         $users = $validated['users'];
         unset($validated['users']);
