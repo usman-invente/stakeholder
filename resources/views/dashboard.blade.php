@@ -60,6 +60,7 @@
     </div>
     @endif
 
+    @if($showUserStats)
     <div class="row">
         <div class="col-md-3 mb-4">
             <div class="card bg-primary text-white h-100">
@@ -67,7 +68,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <h6 class="card-title">Total Users</h6>
-                            <h2 class="mb-0">{{ \App\Models\User::count() }}</h2>
+                            <h2 class="mb-0">{{ $totalUsers }}</h2>
                         </div>
                         <i class="fas fa-users fa-2x opacity-50"></i>
                     </div>
@@ -81,7 +82,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <h6 class="card-title">Today's Users</h6>
-                            <h2 class="mb-0">{{ \App\Models\User::whereDate('created_at', today())->count() }}</h2>
+                            <h2 class="mb-0">{{ $todayUsers }}</h2>
                         </div>
                         <i class="fas fa-user-plus fa-2x opacity-50"></i>
                     </div>
@@ -107,7 +108,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach(\App\Models\User::latest()->take(5)->get() as $user)
+                                @foreach($recentUsers as $user)
                                 <tr>
                                     <td>{{ $user->name }}</td>
                                     <td>{{ $user->email }}</td>
@@ -121,6 +122,61 @@
             </div>
         </div>
     </div>
+    @else
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">All Stakeholders <span class="badge bg-info">Visible to All Users</span></h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Organization</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Type</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse(\App\Models\Stakeholder::take(10)->get() as $stakeholder)
+                                <tr>
+                                    <td>{{ $stakeholder->name }}</td>
+                                    <td>{{ $stakeholder->organization }}</td>
+                                    <td>{{ $stakeholder->email }}</td>
+                                    <td>{{ $stakeholder->phone }}</td>
+                                    <td>{{ ucfirst($stakeholder->type) }}</td>
+                                    <td>
+                                        <a href="{{ route('stakeholders.show', $stakeholder->id) }}" class="btn btn-sm btn-info">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{{ route('stakeholder-communications.create', $stakeholder->id) }}" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-comment"></i> Add Communication
+                                        </a>
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="6" class="text-center">No stakeholders found.</td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                        <div class="text-end mt-3">
+                            <a href="{{ route('stakeholders.index') }}" class="btn btn-primary">
+                                <i class="fas fa-list"></i> View All Stakeholders
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 </div>
 @endsection
 
@@ -128,43 +184,45 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const collapseBtn = document.getElementById('collapseBtn');
-    const collapseIcon = document.getElementById('collapseIcon');
-    const collapseContent = document.getElementById('collapseContent');
-    
-    // Initialize Bootstrap collapse
-    const myCollapse = new bootstrap.Collapse(collapseContent, {
-        toggle: false
-    });
+    if (collapseBtn) {
+        const collapseIcon = document.getElementById('collapseIcon');
+        const collapseContent = document.getElementById('collapseContent');
+        
+        // Initialize Bootstrap collapse
+        const myCollapse = new bootstrap.Collapse(collapseContent, {
+            toggle: false
+        });
 
-    // Track collapse state
-    let isCollapsed = true;
+        // Track collapse state
+        let isCollapsed = true;
 
-    // Handle click event
-    collapseBtn.addEventListener('click', function() {
-        if (isCollapsed) {
-            myCollapse.show();
-            collapseIcon.classList.remove('fa-chevron-down');
-            collapseIcon.classList.add('fa-chevron-up');
-        } else {
-            myCollapse.hide();
+        // Handle click event
+        collapseBtn.addEventListener('click', function() {
+            if (isCollapsed) {
+                myCollapse.show();
+                collapseIcon.classList.remove('fa-chevron-down');
+                collapseIcon.classList.add('fa-chevron-up');
+            } else {
+                myCollapse.hide();
+                collapseIcon.classList.remove('fa-chevron-up');
+                collapseIcon.classList.add('fa-chevron-down');
+            }
+            isCollapsed = !isCollapsed;
+        });
+
+        // Handle Bootstrap events to ensure icon state stays correct
+        collapseContent.addEventListener('hidden.bs.collapse', function () {
             collapseIcon.classList.remove('fa-chevron-up');
             collapseIcon.classList.add('fa-chevron-down');
-        }
-        isCollapsed = !isCollapsed;
-    });
+            isCollapsed = true;
+        });
 
-    // Handle Bootstrap events to ensure icon state stays correct
-    collapseContent.addEventListener('hidden.bs.collapse', function () {
-        collapseIcon.classList.remove('fa-chevron-up');
-        collapseIcon.classList.add('fa-chevron-down');
-        isCollapsed = true;
-    });
-
-    collapseContent.addEventListener('shown.bs.collapse', function () {
-        collapseIcon.classList.remove('fa-chevron-down');
-        collapseIcon.classList.add('fa-chevron-up');
-        isCollapsed = false;
-    });
+        collapseContent.addEventListener('shown.bs.collapse', function () {
+            collapseIcon.classList.remove('fa-chevron-down');
+            collapseIcon.classList.add('fa-chevron-up');
+            isCollapsed = false;
+        });
+    }
 });
 </script>
 @endpush

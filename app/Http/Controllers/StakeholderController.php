@@ -10,13 +10,8 @@ class StakeholderController extends Controller
 {
     public function index()
     {
-        if (Auth::user()->role === 'admin') {
-            // Admin sees all stakeholders
-            $stakeholders = Stakeholder::paginate(10);
-        } else {
-            // Regular user sees only assigned stakeholders
-            $stakeholders = Auth::user()->stakeholders()->paginate(10);
-        }
+        // All users see all stakeholders
+        $stakeholders = Stakeholder::paginate(10);
         
         return view('stakeholders.index', compact('stakeholders'));
     }
