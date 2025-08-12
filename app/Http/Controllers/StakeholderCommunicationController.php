@@ -6,6 +6,7 @@ use App\Models\StakeholderCommunication;
 use App\Models\Stakeholder;
 use App\Exports\StakeholderCommunicationsExport;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 
 class StakeholderCommunicationController extends Controller
@@ -160,14 +161,28 @@ class StakeholderCommunicationController extends Controller
 
     public function export(Request $request)
     {
-        $export = new StakeholderCommunicationsExport();
-        $export->setDateRange($request->start_date, $request->end_date);
-        
-        $filename = 'stakeholder-communications-' . now()->format('Y-m-d');
-        if ($request->filled('start_date') && $request->filled('end_date')) {
-            $filename = 'stakeholder-communications-' . $request->start_date . '-to-' . $request->end_date;
+        try {
+            $export = new StakeholderCommunicationsExport();
+            $export->setDateRange($request->start_date, $request->end_date);
+            
+            $filename = 'stakeholder-communications-' . now()->format('Y-m-d');
+            if ($request->filled('start_date') && $request->filled('end_date')) {
+                $filename = 'stakeholder-communications-' . $request->start_date . '-to-' . $request->end_date;
+            }
+            
+            // Replace any characters that might cause filename issues
+            $filename = preg_replace('/[^a-z0-9-_]/i', '-', $filename);
+            
+            return Excel::download($export, $filename . '.xlsx');
+        } catch (\Exception $e) {
+            // Log the error for debugging
+            Log::error('Export failed: ' . $e->getMessage(), [
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return redirect()->back()->with('error', 'Export failed: ' . $e->getMessage());
         }
-        
-        return Excel::download($export, $filename . '.xlsx');
     }
 }

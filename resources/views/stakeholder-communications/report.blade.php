@@ -52,13 +52,22 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h4>Stakeholder Communications Report</h4>
                     <div>
-                        <a href="{{ route('stakeholder-communications.export') }}{{ request()->has('start_date') ? '?start_date='.request('start_date').'&end_date='.request('end_date') : '' }}" class="btn btn-success">
+                        <a href="{{ route('stakeholder-communications.export') }}{{ request()->has('start_date') ? '?start_date='.request('start_date').'&end_date='.request('end_date') : '' }}" class="btn btn-success me-2">
                             <i class="fas fa-file-excel"></i> Export to Excel
                         </a>
+                        <!-- <a href="{{ route('stakeholder-communications.export-csv') }}{{ request()->has('start_date') ? '?start_date='.request('start_date').'&end_date='.request('end_date') : '' }}" class="btn btn-info">
+                            <i class="fas fa-file-csv"></i> Export to CSV
+                        </a> -->
                     </div>
                 </div>
 
                 <div class="card-body">
+                    @if(session('error'))
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            {{ session('error') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
                     <form action="{{ route('stakeholder-communications.report') }}" method="GET" class="mb-4">
                         <div class="row g-3">
                             <div class="col-12 col-sm-6 col-md-4">

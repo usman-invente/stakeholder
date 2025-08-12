@@ -5,7 +5,6 @@
 @section('content')
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Stakeholders <span class="badge bg-info">Visible to All Users</span></h1>
         <a href="{{ route('stakeholders.create') }}" class="btn btn-primary">
             <i class="fas fa-plus"></i> Add Stakeholder
         </a>

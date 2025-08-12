@@ -45,6 +45,8 @@ Route::middleware(['auth'])->group(function () {
             ->name('stakeholder-communications.report');
         Route::get('communications/export', [StakeholderCommunicationController::class, 'export'])
             ->name('stakeholder-communications.export');
+        Route::get('communications/export-csv', [App\Http\Controllers\ExportFallbackController::class, 'exportCsv'])
+            ->name('stakeholder-communications.export-csv');
         Route::get('stakeholders/{stakeholder}/communications', [StakeholderCommunicationController::class, 'index'])
             ->name('stakeholder-communications.index');
         Route::get('stakeholders/{stakeholder}/communications/create', [StakeholderCommunicationController::class, 'create'])
