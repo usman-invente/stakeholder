@@ -29,12 +29,8 @@ class StakeholderCommunicationAlert extends Notification
     public function toMail($notifiable)
     {
         $count = $this->stakeholders->count();
-        $mailMessage = (new MailMessage)
-            ->subject('Stakeholder Communication Alert')
-            ->line("There are {$count} stakeholders without communication in the last {$this->threshold} days.")
-            ->line('The following stakeholders require attention:');
-
-        // Create a table with stakeholder information
+        
+        // Create the table HTML
         $tableRows = '';
         foreach ($this->stakeholders as $index => $stakeholder) {
             $tableRows .= '
@@ -47,7 +43,7 @@ class StakeholderCommunicationAlert extends Notification
             </tr>';
         }
 
-        $table = '
+        $tableHtml = '
         <table style="border-collapse: collapse; width: 100%; margin-bottom: 20px;">
             <thead>
                 <tr>
@@ -62,12 +58,18 @@ class StakeholderCommunicationAlert extends Notification
                 ' . $tableRows . '
             </tbody>
         </table>';
-
-        $mailMessage->line($table);
-        $mailMessage->action('View Report', route('stakeholder-communications.report'))
-            ->line('Please review and take necessary action.');
-            
-        return $mailMessage;
+        
+        // Use markdown to create the email with HTML
+        return (new MailMessage)
+            ->subject('Stakeholder Communication Alert')
+            ->greeting('Hello!')
+            ->line("There are {$count} stakeholders without communication in the last {$this->threshold} days.")
+            ->line('The following stakeholders require attention:')
+            ->view('vendor.notifications.stakeholder-alert', [
+                'tableHtml' => $tableHtml,
+                'count' => $count,
+                'threshold' => $this->threshold,
+            ]);
     }
 
     public function toArray($notifiable)
