@@ -55,7 +55,7 @@ class StakeholdersImportNew implements
         $this->successCount++;
         
         // Try different possible column names (case-insensitive)
-        $name =  $row['contact_name'] ?? null;
+        $name =  $row['contact_name'] ?? 'N/A';
         $email = $row['email'] ?? 'N/A';
         $phone = $row['phone']  ?? 'N/A';
         $organization = $row['organization']  ?? 'N/A';
