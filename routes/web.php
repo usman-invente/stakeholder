@@ -6,6 +6,7 @@ use App\Http\Controllers\StakeholderController;
 use App\Http\Controllers\StakeholderCommunicationController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\MailTestController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Middleware\AdminMiddleware;
@@ -38,6 +39,10 @@ Route::middleware(['auth'])->group(function () {
     
     // Stakeholder routes - accessible to both admin and regular users
     Route::middleware(['auth'])->group(function () {
+        // Test email route
+        Route::get('/send-test-email', [MailTestController::class, 'sendTestEmail'])
+            ->name('send.test.email');
+            
         Route::resource('stakeholders', StakeholderController::class);
         Route::get('stakeholders-export', [StakeholderController::class, 'export'])
             ->name('stakeholders.export');

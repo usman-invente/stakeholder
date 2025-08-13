@@ -16,6 +16,7 @@ class CheckStakeholderCommunications extends Command
 
     public function handle()
     {
+        \Log::info("dsd");
         $threshold = Setting::getValue('communication_alert_threshold', 30);
         $thresholdDate = now()->subDays($threshold);
 
@@ -30,10 +31,17 @@ class CheckStakeholderCommunications extends Command
             foreach ($admins as $admin) {
                 $admin->notify(new StakeholderCommunicationAlert($stakeholders, $threshold));
             }
+            
+            // Send notification to regular users as well
+            $regularUsers = User::where('role', '!=', 'admin')->get();
+            
+            foreach ($regularUsers as $user) {
+                $user->notify(new StakeholderCommunicationAlert($stakeholders, $threshold));
+            }
 
-            $this->info("Alerts sent for {$stakeholders->count()} stakeholders.");
+            \Log::info("Alerts sent for {$stakeholders->count()} stakeholders to both admins and regular users.");
         } else {
-            $this->info('No alerts needed.');
+           \Log::info('No alerts needed.');
         }
     }
 }
