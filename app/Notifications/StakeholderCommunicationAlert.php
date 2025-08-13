@@ -59,12 +59,9 @@ class StakeholderCommunicationAlert extends Notification
             </tbody>
         </table>';
         
-        // Use markdown to create the email with HTML
+        // Use view to create the email with HTML
         return (new MailMessage)
             ->subject('Stakeholder Communication Alert')
-            ->greeting('Hello!')
-            ->line("There are {$count} stakeholders without communication in the last {$this->threshold} days.")
-            ->line('The following stakeholders require attention:')
             ->view('vendor.notifications.stakeholder-alert', [
                 'tableHtml' => $tableHtml,
                 'count' => $count,
