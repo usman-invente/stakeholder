@@ -58,13 +58,13 @@
                                     <i class="fas fa-handshake me-2"></i> Manage Stakeholders
                                 </a>
                             </li>
-                            <li>
+                            
+                        @endif
+                        <li>
                                 <a class="dropdown-item py-2" href="{{ route('stakeholder-communications.report') }}">
                                     <i class="fas fa-chart-bar me-2"></i> Monthly Report
                                 </a>
-                            </li>
-                        @endif
-                        
+                        </li>
                         <li><hr class="dropdown-divider my-2"></li>
                         
                         <li>

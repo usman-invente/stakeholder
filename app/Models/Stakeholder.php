@@ -14,6 +14,8 @@ class Stakeholder extends Model
         'email',
         'phone',
         'organization',
+        'dcg_contact_person',
+        'method_of_engagement',
         'position',
         'address',
         'type',

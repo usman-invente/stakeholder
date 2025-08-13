@@ -23,12 +23,12 @@
                 <i class="fas fa-handshake me-2"></i> <span class="nav-text">Stakeholders</span>
             </a>
         </li>
-          @if(Auth::user()->role === 'admin')
+       
         <li class="nav-item">
             <a class="nav-link text-white {{ Request::is('communications/report') ? 'active bg-primary' : '' }}" href="{{ route('stakeholder-communications.report') }}">
                 <i class="fas fa-chart-bar me-2"></i> <span class="nav-text">Monthly Engagements Report</span>
             </a>
         </li>
-          @endif
+         
     </ul>
 </div>

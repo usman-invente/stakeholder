@@ -39,6 +39,12 @@ Route::middleware(['auth'])->group(function () {
     // Stakeholder routes - accessible to both admin and regular users
     Route::middleware(['auth'])->group(function () {
         Route::resource('stakeholders', StakeholderController::class);
+        Route::get('stakeholders-export', [StakeholderController::class, 'export'])
+            ->name('stakeholders.export');
+        Route::get('stakeholders-import', [StakeholderController::class, 'importForm'])
+            ->name('stakeholders.import.form');
+        Route::post('stakeholders-import', [StakeholderController::class, 'import'])
+            ->name('stakeholders.import');
         
         // Stakeholder Communications routes
         Route::get('communications/report', [StakeholderCommunicationController::class, 'report'])
