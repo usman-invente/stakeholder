@@ -56,7 +56,7 @@ class StakeholdersImportNew implements
         
         // Try different possible column names (case-insensitive)
         $name =  $row['contact_name'] ?? 'N/A';
-        $email = $row['email'] ?? 'N/A';
+        $email = $row['email'] ?? null;
         $phone = $row['phone']  ?? 'N/A';
         $organization = $row['organization']  ?? 'N/A';
         $dcgContact = $row['dcg_contact_person']  ?? 'N/A';

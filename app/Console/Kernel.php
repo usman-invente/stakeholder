@@ -15,7 +15,7 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('stakeholders:check-communications')
                 ->daily()
-                ->at('09:00');
+                ->at('00:00')->timezone(config('app.timezone'));
     }
 
     protected function commands()
