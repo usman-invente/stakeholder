@@ -57,12 +57,12 @@ class StakeholdersImportNew implements
         // Try different possible column names (case-insensitive)
         $name =  $row['contact_name'] ?? null;
         $email = $row['email'] ?? 'N/A';
-        $phone = $row['phone']  ?? null;
-        $organization = $row['organization']  ?? null ;
-        $dcgContact = $row['dcg_contact_person']  ?? null;
-        $method = $row['method_of_engagement']  ?? null;
-        $position = $row['position']  ?? null;
-        $type = $row['type']  ?? 'external';
+        $phone = $row['phone']  ?? 'N/A';
+        $organization = $row['organization']  ?? 'N/A';
+        $dcgContact = $row['dcg_contact_person']  ?? 'N/A';
+        $method = $row['method_of_engagement']  ?? 'N/A';
+        $position = $row['position']  ?? 'N/A';
+        $type = $row['type']  ?? 'N/A';
         
         Log::info('Mapped data:', [
             'name' => $name,
