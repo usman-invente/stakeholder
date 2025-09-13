@@ -65,6 +65,7 @@
                             <th>Organization</th>
                             <th>Name</th>
                             <th>Email</th>
+                            <th>Organization</th>
                             <th>DCG Contact</th>
                             <th>Method of Engagement</th>
                             <th>Type</th>
@@ -78,6 +79,7 @@
                                 <td>{{ $stakeholder->organization }}</td>
                                 <td>{{ $stakeholder->name }}</td>
                                 <td>{{ $stakeholder->email }}</td>
+                                <td>{{ $stakeholder->organization }}</td>
                                 <td>{{ $stakeholder->dcg_contact_person ?? 'N/A' }}</td>
                                 <td>{{ $stakeholder->method_of_engagement ?? 'N/A' }}</td>
                                 <td>

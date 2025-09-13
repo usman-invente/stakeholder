@@ -2,7 +2,7 @@
 
 namespace App\Imports;
 
-us    /**
+   /**
      * @param array $row
      *
      * @return \Illuminate\Database\Eloquent\Model|null
@@ -82,21 +82,19 @@ class StakeholdersImport implements
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255',
+            'contact_name' => 'required|string|max:255',
             'email' => 'required|email|unique:stakeholders,email',
             'phone' => 'nullable|string|max:20',
             'organization' => 'nullable|string|max:255',
             'dcg_contact_person' => 'nullable|string|max:255',
             'method_of_engagement' => 'nullable|string|max:255',
             'position' => 'nullable|string|max:255',
-            'address' => 'nullable|string',
             'type' => ['nullable', 'string', function ($attribute, $value, $fail) {
                 $value = strtolower($value);
                 if (!in_array($value, ['internal', 'external'])) {
                     $fail('The type must be either "internal" or "external".');
                 }
             }],
-            'notes' => 'nullable|string',
         ];
     }
 
