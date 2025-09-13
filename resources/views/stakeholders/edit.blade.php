@@ -18,6 +18,17 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
+                                    <label for="organization" class="form-label">Organization <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control @error('organization') is-invalid @enderror" id="organization" name="organization"
+                                        value="{{ old('organization', $stakeholder->organization) }}" required>
+                                    <small class="text-muted">Required, maximum 255 characters</small>
+                                    @error('organization')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
                                     <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" 
                                         value="{{ old('name', $stakeholder->name) }}" required>
@@ -38,10 +49,7 @@
                                     @enderror
                                 </div>
                             </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
+                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="phone" class="form-label">Phone</label>
                                     <input type="text" class="form-control @error('phone') is-invalid @enderror" id="phone" name="phone"
@@ -51,13 +59,27 @@
                                     @enderror
                                 </div>
                             </div>
+                        </div>
+
+                      
+
+                        <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="organization" class="form-label">Organization <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control @error('organization') is-invalid @enderror" id="organization" name="organization"
-                                        value="{{ old('organization', $stakeholder->organization) }}" required>
-                                    <small class="text-muted">Required, maximum 255 characters</small>
-                                    @error('organization')
+                                    <label for="dcg_contact_person" class="form-label">DCG Contact Person</label>
+                                    <input type="text" class="form-control @error('dcg_contact_person') is-invalid @enderror" id="dcg_contact_person" name="dcg_contact_person"
+                                        value="{{ old('dcg_contact_person', $stakeholder->dcg_contact_person) }}">
+                                    @error('dcg_contact_person')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="method_of_engagement" class="form-label">Method of Engagement</label>
+                                    <input type="text" class="form-control @error('method_of_engagement') is-invalid @enderror" id="method_of_engagement" name="method_of_engagement"
+                                        value="{{ old('method_of_engagement', $stakeholder->method_of_engagement) }}">
+                                    @error('method_of_engagement')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>

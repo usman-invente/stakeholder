@@ -5,10 +5,14 @@
 @section('content')
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Stakeholders <span class="badge bg-info">Visible to All Users</span></h1>
-        <a href="{{ route('stakeholders.create') }}" class="btn btn-primary">
-            <i class="fas fa-plus"></i> Add Stakeholder
-        </a>
+        <div>
+            <a href="{{ route('stakeholders.create') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add Stakeholder
+            </a>
+            <a href="{{ route('stakeholders.import.form') }}" class="btn btn-success ms-2">
+                <i class="fas fa-file-import"></i> Import Stakeholders
+            </a>
+        </div>
     </div>
 
     @if(session('success'))
@@ -18,15 +22,51 @@
         </div>
     @endif
 
+    <div class="card mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">Search Stakeholders</h5>
+        </div>
+        <div class="card-body">
+            <form action="{{ route('stakeholders.index') }}" method="GET" class="row g-3">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input type="text" name="search" class="form-control" placeholder="Search by name, email, organization, DCG contact, or method of engagement" value="{{ request('search') }}">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select name="type" class="form-select">
+                        <option value="">All Types</option>
+                        <option value="internal" {{ request('type') == 'internal' ? 'selected' : '' }}>Internal</option>
+                        <option value="external" {{ request('type') == 'external' ? 'selected' : '' }}>External</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <div class="d-flex">
+                        <button type="submit" class="btn btn-primary me-2">Filter</button>
+                        <a href="{{ route('stakeholders.index') }}" class="btn btn-secondary me-2">Reset</a>
+                        <a href="{{ route('stakeholders.export') }}{{ request()->getQueryString() ? '?' . request()->getQueryString() : '' }}" class="btn btn-success">
+                            <i class="fas fa-file-excel"></i> Export
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="card">
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table table-hover">
                     <thead>
                         <tr>
+                            
+                          
+                            <th>Organization</th>
                             <th>Name</th>
                             <th>Email</th>
-                            <th>Organization</th>
+                            <th>DCG Contact</th>
+                            <th>Method of Engagement</th>
                             <th>Type</th>
                             <th>Actions</th>
                         </tr>
@@ -34,9 +74,12 @@
                     <tbody>
                         @forelse($stakeholders as $stakeholder)
                             <tr>
+                                
+                                <td>{{ $stakeholder->organization }}</td>
                                 <td>{{ $stakeholder->name }}</td>
                                 <td>{{ $stakeholder->email }}</td>
-                                <td>{{ $stakeholder->organization }}</td>
+                                <td>{{ $stakeholder->dcg_contact_person ?? 'N/A' }}</td>
+                                <td>{{ $stakeholder->method_of_engagement ?? 'N/A' }}</td>
                                 <td>
                                     <span class="badge bg-{{ $stakeholder->type === 'internal' ? 'primary' : 'secondary' }}">
                                         {{ ucfirst($stakeholder->type) }}
@@ -60,7 +103,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="text-center">No stakeholders found.</td>
+                                <td colspan="7" class="text-center">No stakeholders found.</td>
                             </tr>
                         @endforelse
                     </tbody>

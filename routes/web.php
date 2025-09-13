@@ -6,6 +6,7 @@ use App\Http\Controllers\StakeholderController;
 use App\Http\Controllers\StakeholderCommunicationController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\MailTestController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Middleware\AdminMiddleware;
@@ -38,13 +39,25 @@ Route::middleware(['auth'])->group(function () {
     
     // Stakeholder routes - accessible to both admin and regular users
     Route::middleware(['auth'])->group(function () {
+        // Test email route
+        Route::get('/send-test-email', [MailTestController::class, 'sendTestEmail'])
+            ->name('send.test.email');
+            
         Route::resource('stakeholders', StakeholderController::class);
+        Route::get('stakeholders-export', [StakeholderController::class, 'export'])
+            ->name('stakeholders.export');
+        Route::get('stakeholders-import', [StakeholderController::class, 'importForm'])
+            ->name('stakeholders.import.form');
+        Route::post('stakeholders-import', [StakeholderController::class, 'import'])
+            ->name('stakeholders.import');
         
         // Stakeholder Communications routes
         Route::get('communications/report', [StakeholderCommunicationController::class, 'report'])
             ->name('stakeholder-communications.report');
         Route::get('communications/export', [StakeholderCommunicationController::class, 'export'])
             ->name('stakeholder-communications.export');
+        Route::get('communications/export-csv', [App\Http\Controllers\ExportFallbackController::class, 'exportCsv'])
+            ->name('stakeholder-communications.export-csv');
         Route::get('stakeholders/{stakeholder}/communications', [StakeholderCommunicationController::class, 'index'])
             ->name('stakeholder-communications.index');
         Route::get('stakeholders/{stakeholder}/communications/create', [StakeholderCommunicationController::class, 'create'])

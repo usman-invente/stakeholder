@@ -1,0 +1,28 @@
+[14-Aug-2025 15:05:22 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/dsmctudz/public_html/config/services.php:18
+Stack trace:
+#0 {main}
+  thrown in /home/dsmctudz/public_html/config/services.php on line 18
+[14-Aug-2025 15:07:07 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/dsmctudz/public_html/config/database.php:19
+Stack trace:
+#0 {main}
+  thrown in /home/dsmctudz/public_html/config/database.php on line 19
+[15-Aug-2025 18:42:03 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/dsmctudz/public_html/config/mail.php:17
+Stack trace:
+#0 {main}
+  thrown in /home/dsmctudz/public_html/config/mail.php on line 17
+[15-Aug-2025 18:42:03 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/dsmctudz/public_html/config/cache.php:18
+Stack trace:
+#0 {main}
+  thrown in /home/dsmctudz/public_html/config/cache.php on line 18
+[15-Aug-2025 18:42:03 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/dsmctudz/public_html/config/queue.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/dsmctudz/public_html/config/queue.php on line 16
+[15-Aug-2025 23:29:47 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/dsmctudz/public_html/config/services.php:18
+Stack trace:
+#0 {main}
+  thrown in /home/dsmctudz/public_html/config/services.php on line 18
+[15-Aug-2025 23:30:40 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/dsmctudz/public_html/config/database.php:19
+Stack trace:
+#0 {main}
+  thrown in /home/dsmctudz/public_html/config/database.php on line 19

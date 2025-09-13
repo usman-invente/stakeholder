@@ -118,6 +118,14 @@
                                     <td>{{ $stakeholder->organization }}</td>
                                 </tr>
                                 <tr>
+                                    <th>DCG Contact Person</th>
+                                    <td>{{ $stakeholder->dcg_contact_person ?? 'N/A' }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Method of Engagement</th>
+                                    <td>{{ $stakeholder->method_of_engagement ?? 'N/A' }}</td>
+                                </tr>
+                                <tr>
                                     <th>Position</th>
                                     <td>{{ $stakeholder->position ?? 'N/A' }}</td>
                                 </tr>
