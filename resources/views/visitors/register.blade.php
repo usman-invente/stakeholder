@@ -72,8 +72,9 @@
 
                         <div class="form-group row mb-0">
                             <div class="col-md-6 offset-md-4">
-                                <button type="submit" class="btn btn-primary">
-                                    Register
+                                <button type="submit" id="registerBtn" class="btn btn-primary">
+                                    <span id="registerText">Register</span>
+                                    <span id="registerSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
                                 </button>
                             </div>
                         </div>
@@ -200,6 +201,11 @@
         $('#guestForm').on('submit', function(e) {
             e.preventDefault();
             
+            // Disable button and show loader
+            $('#registerBtn').prop('disabled', true);
+            $('#registerText').addClass('d-none');
+            $('#registerSpinner').removeClass('d-none');
+            
             let formData = new FormData(this);
             formData.append('session_id', sessionId);
             
@@ -234,6 +240,12 @@
                             $('#' + key).addClass('is-invalid');
                         });
                     }
+                },
+                complete: function() {
+                    // Re-enable button and hide loader
+                    $('#registerBtn').prop('disabled', false);
+                    $('#registerText').removeClass('d-none');
+                    $('#registerSpinner').addClass('d-none');
                 }
             });
         });

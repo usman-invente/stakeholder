@@ -8,6 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class Visitor extends Model
 {
     use HasFactory;
+    
+    /**
+     * The timezone for date attributes.
+     */
+    protected $timezone = 'Africa/Dar_es_Salaam';
 
     protected $fillable = [
         'full_name',
@@ -22,8 +27,15 @@ class Visitor extends Model
         'email_sent',
     ];
 
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
     protected $casts = [
-        'check_in_time' => 'datetime',
-        'check_out_time' => 'datetime',
+        'check_in_time' => 'datetime:Africa/Dar_es_Salaam',
+        'check_out_time' => 'datetime:Africa/Dar_es_Salaam',
+        'created_at' => 'datetime:Africa/Dar_es_Salaam',
+        'updated_at' => 'datetime:Africa/Dar_es_Salaam',
     ];
 }
