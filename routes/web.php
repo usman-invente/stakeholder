@@ -7,9 +7,11 @@ use App\Http\Controllers\StakeholderCommunicationController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\MailTestController;
+use App\Http\Controllers\VisitorController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Middleware\AdminMiddleware;
+
 Route::get('/', function () {
     return view('auth.login');
 });
@@ -23,26 +25,26 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    
+
     // Admin routes
     Route::middleware(['admin'])->group(function () {
         // Settings routes
         Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
         Route::put('/settings', [SettingController::class, 'update'])->name('settings.update');
-        
+
         // User management routes
         Route::resource('users', UserController::class);
-        
+
         // Activity log routes
         Route::get('activity-log', [ActivityLogController::class, 'index'])->name('activity-log.index');
     });
-    
+
     // Stakeholder routes - accessible to both admin and regular users
     Route::middleware(['auth'])->group(function () {
         // Test email route
         Route::get('/send-test-email', [MailTestController::class, 'sendTestEmail'])
             ->name('send.test.email');
-            
+
         Route::resource('stakeholders', StakeholderController::class);
         Route::get('stakeholders-export', [StakeholderController::class, 'export'])
             ->name('stakeholders.export');
@@ -50,7 +52,7 @@ Route::middleware(['auth'])->group(function () {
             ->name('stakeholders.import.form');
         Route::post('stakeholders-import', [StakeholderController::class, 'import'])
             ->name('stakeholders.import');
-        
+
         // Stakeholder Communications routes
         Route::get('communications/report', [StakeholderCommunicationController::class, 'report'])
             ->name('stakeholder-communications.report');
@@ -75,6 +77,17 @@ Route::middleware(['auth'])->group(function () {
     });
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
 
 Auth::routes();
+
+// Visitor Registration System (Public Routes)
+Route::get('/visitor', [VisitorController::class, 'showRegistrationForm'])->name('visitor.register');
+Route::post('/visitor', [VisitorController::class, 'store'])->name('visitor.store');
+Route::post('/form/update', [VisitorController::class, 'updateFormData'])->name('form.update');
+
+// Receptionist View (Protected Route)
+Route::get('/receptionist', [VisitorController::class, 'showReceptionistView'])->name('receptionist.view');
+Route::get('/form/fetch/{sessionId}', [VisitorController::class, 'getFormData'])->name('form.fetch');
+Route::get('/form/active-sessions', [VisitorController::class, 'getActiveSessions'])->name('form.active-sessions');
+Route::post('/form/update-receptionist', [VisitorController::class, 'updateFormDataByReceptionist'])->name('form.update-receptionist');
