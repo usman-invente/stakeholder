@@ -6,9 +6,12 @@ use App\Models\Visitor;
 use App\Notifications\VisitorRegistrationNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Carbon\Carbon;
+use Endroid\QrCode\QrCode;
+use Endroid\QrCode\Writer\PngWriter;
+use Endroid\QrCode\ErrorCorrectionLevel;
 
 class VisitorController extends Controller
 {
@@ -52,11 +55,15 @@ class VisitorController extends Controller
         // Send email notification with QR code to host
         if ($visitor->host_email) {
             try {
-                Notification::route('mail', $visitor->host_email)
-                    ->notify(new VisitorRegistrationNotification($visitor, $qrCodePath));
+                // Using Mail facade directly for immediate sending without queue
+                \Illuminate\Support\Facades\Mail::to($visitor->host_email)
+                    ->send(new \App\Mail\VisitorRegistered($visitor, $qrCodePath));
                 
                 // Mark email as sent
                 $visitor->update(['email_sent' => true]);
+                
+                // Log success
+                \Illuminate\Support\Facades\Log::info('Email sent to host: ' . $visitor->host_email);
             } catch (\Exception $e) {
                 \Illuminate\Support\Facades\Log::error('Failed to send visitor notification: ' . $e->getMessage());
                 // Continue anyway - don't let email issues stop the registration
@@ -97,12 +104,20 @@ class VisitorController extends Controller
             mkdir($directory, 0755, true);
         }
         
-        // Generate QR code
-        QrCode::format('png')
-            ->size(300)
-            ->errorCorrection('H')
-            ->encoding('UTF-8')
-            ->generate($meetingUrl, $path);
+        // Generate QR code using Endroid QR Code
+        $qrCode = new QrCode(
+            $meetingUrl,
+            encoding: new \Endroid\QrCode\Encoding\Encoding('UTF-8'),
+            errorCorrectionLevel: ErrorCorrectionLevel::High,
+            size: 300,
+            margin: 10
+        );
+            
+        $writer = new PngWriter();
+        $result = $writer->write($qrCode);
+        
+        // Save QR code to file
+        file_put_contents($path, $result->getString());
             
         return $path;
     }
@@ -177,7 +192,7 @@ class VisitorController extends Controller
                           
         // Get all active session IDs
         $activeSessions = DB::table('form_sessions')
-            ->where('updated_at', '>=', now()->subMinutes(30))
+            ->where('updated_at', '>=', Carbon::now()->subMinutes(30))
             ->orderBy('updated_at', 'desc')
             ->get();
             
@@ -218,7 +233,7 @@ class VisitorController extends Controller
     public function getActiveSessions()
     {
         $activeSessions = DB::table('form_sessions')
-            ->where('updated_at', '>=', now()->subMinutes(30))
+            ->where('updated_at', '>=', Carbon::now()->subMinutes(30))
             ->orderBy('updated_at', 'desc')
             ->get();
             
@@ -227,5 +242,31 @@ class VisitorController extends Controller
             'activeSessions' => $activeSessions,
             'count' => $activeSessions->count()
         ]);
+    }
+    
+    /**
+     * Export visitors to Excel.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
+     */
+    public function export(Request $request)
+    {
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        
+        $filename = 'visitors-' . date('Y-m-d') . '.xlsx';
+        
+        // Add date range to filename if provided
+        if ($startDate && $endDate) {
+            $filename = 'visitors-' . $startDate . '-to-' . $endDate . '.xlsx';
+        } elseif ($endDate) {
+            $filename = 'visitors-until-' . $endDate . '.xlsx';
+        }
+        
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\VisitorsExport($startDate, $endDate), 
+            $filename
+        );
     }
 }

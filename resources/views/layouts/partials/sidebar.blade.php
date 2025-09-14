@@ -21,11 +21,7 @@
                     <i class="fas fa-user-plus me-2"></i> <span class="nav-text">New Visitor Registration</span>
                 </a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link text-white" href="#" onclick="event.preventDefault(); document.getElementById('qr-code-modal').classList.add('show'); document.getElementById('qr-code-modal').style.display = 'block';">
-                    <i class="fas fa-qrcode me-2"></i> <span class="nav-text">Show Registration QR Code</span>
-                </a>
-            </li>
+            
         @else
             <li class="nav-item">
                 <a class="nav-link text-white {{ Request::is('dashboard') ? 'active bg-primary' : '' }}" href="{{ route('dashboard') }}">

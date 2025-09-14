@@ -8,7 +8,9 @@
                 <div class="card-header">
                     <div class="d-flex justify-content-between align-items-center">
                         <h3 class="mb-0">Receptionist View - Live Visitor Registration</h3>
-                        <span class="badge bg-success" id="connection-status">Connected</span>
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-success me-2" id="connection-status">Connected</span>
+                        </div>
                     </div>
                 </div>
 
@@ -69,7 +71,14 @@
 
                     <div class="card">
                         <div class="card-header bg-secondary text-white">
-                            <h5 class="mb-0">Recent Visitors</h5>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Recent Visitors</h5>
+                                <div>
+                                    <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#exportModal">
+                                        <i class="fas fa-file-excel me-1"></i> Export to Excel
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
@@ -108,6 +117,38 @@
             </div>
         </div>
     </div>
+</div>
+
+<!-- Export Modal -->
+<div class="modal fade" id="exportModal" tabindex="-1" aria-labelledby="exportModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form action="{{ route('visitors.export') }}" method="GET">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exportModalLabel">Export Visitors Data</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <div class="mb-3">
+                <label for="start_date" class="form-label">Start Date</label>
+                <input type="date" class="form-control" id="start_date" name="start_date">
+                <div class="form-text">Leave blank to include all records from the beginning</div>
+            </div>
+            <div class="mb-3">
+                <label for="end_date" class="form-label">End Date</label>
+                <input type="date" class="form-control" id="end_date" name="end_date">
+                <div class="form-text">Leave blank to include all records up to today</div>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-success">
+            <i class="fas fa-file-excel me-1"></i> Export
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
 @endsection
 
@@ -395,6 +436,24 @@
         // On keydown, clear the countdown 
         $('#liveDataForm input').on('keydown', function() {
             clearTimeout(typingTimer);
+        });
+        
+        // Set default dates for export modal
+        $('#exportModal').on('show.bs.modal', function() {
+            const today = new Date();
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(today.getDate() - 30);
+            
+            // Format dates for input fields (YYYY-MM-DD)
+            const formatDate = (date) => {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            };
+            
+            $('#start_date').val(formatDate(thirtyDaysAgo));
+            $('#end_date').val(formatDate(today));
         });
     });
 </script>
