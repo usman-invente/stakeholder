@@ -18,6 +18,8 @@ class Visitor extends Model
         'host_email',
         'check_in_time',
         'check_out_time',
+        'meeting_id',
+        'email_sent',
     ];
 
     protected $casts = [

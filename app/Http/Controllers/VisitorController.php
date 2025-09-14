@@ -3,8 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Visitor;
+use App\Notifications\VisitorRegistrationNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Str;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class VisitorController extends Controller
 {
@@ -35,11 +39,29 @@ class VisitorController extends Controller
             'host_email' => 'required|email|max:255',
         ]);
         
-        // Add check-in time
+        // Add check-in time and meeting ID
         $validated['check_in_time'] = now();
+        $validated['meeting_id'] = Str::uuid();
         
         // Create visitor record
-        Visitor::create($validated);
+        $visitor = Visitor::create($validated);
+        
+        // Generate QR code
+        $qrCodePath = $this->generateQrCode($visitor);
+        
+        // Send email notification with QR code to host
+        if ($visitor->host_email) {
+            try {
+                Notification::route('mail', $visitor->host_email)
+                    ->notify(new VisitorRegistrationNotification($visitor, $qrCodePath));
+                
+                // Mark email as sent
+                $visitor->update(['email_sent' => true]);
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Failed to send visitor notification: ' . $e->getMessage());
+                // Continue anyway - don't let email issues stop the registration
+            }
+        }
         
         // Clear the form data for this session
         $sessionId = $request->input('session_id');
@@ -49,6 +71,40 @@ class VisitorController extends Controller
             'success' => true,
             'message' => 'Registration successful! Please wait for your host to receive you.'
         ]);
+    }
+    
+    /**
+     * Generate QR code for a visitor.
+     *
+     * @param  \App\Models\Visitor  $visitor
+     * @return string
+     */
+    private function generateQrCode(Visitor $visitor)
+    {
+        $meetingUrl = url('/meetings/' . $visitor->meeting_id);
+        $fileName = 'qrcode_' . $visitor->meeting_id . '.png';
+        
+        // Try to use storage/app/public directory first (if symbolic link exists)
+        $storagePath = public_path('storage/qrcodes/' . $fileName);
+        $directPath = public_path('qrcodes/' . $fileName);
+        
+        // Determine which path to use
+        $path = file_exists(public_path('storage')) ? $storagePath : $directPath;
+        $directory = file_exists(public_path('storage')) ? public_path('storage/qrcodes') : public_path('qrcodes');
+        
+        // Ensure directory exists
+        if (!file_exists($directory)) {
+            mkdir($directory, 0755, true);
+        }
+        
+        // Generate QR code
+        QrCode::format('png')
+            ->size(300)
+            ->errorCorrection('H')
+            ->encoding('UTF-8')
+            ->generate($meetingUrl, $path);
+            
+        return $path;
     }
     
     /**

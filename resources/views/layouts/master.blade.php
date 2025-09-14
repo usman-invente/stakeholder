@@ -62,6 +62,48 @@
             border: 0;
         }
         
+        /* Modal styles for QR code */
+        #qr-code-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1055;
+            width: 100%;
+            height: 100%;
+            overflow-x: hidden;
+            overflow-y: auto;
+            outline: 0;
+            background-color: rgba(0,0,0,0.5);
+            display: none;
+        }
+        
+        #qr-code-modal.show {
+            display: block;
+        }
+        
+        #qr-code-modal .modal-dialog {
+            position: relative;
+            width: auto;
+            margin: 1.75rem auto;
+            max-width: 500px;
+        }
+        
+        #qr-code-modal .modal-content {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            background-color: #fff;
+            border-radius: 0.3rem;
+        }
+        
+        @media (max-width: 576px) {
+            #qr-code-modal .modal-dialog {
+                margin: 0.5rem;
+                max-width: calc(100% - 1rem);
+            }
+        }
+        
         /* Better dropdown positioning on tablets */
         @media (min-width: 768px) and (max-width: 991.98px) {
             .dropdown-menu {
@@ -216,6 +258,26 @@
                     wrapper.appendChild(table);
                 }
             });
+            
+            // Handle QR code modal
+            const qrModal = document.getElementById('qr-code-modal');
+            if (qrModal) {
+                // Close modal when clicking the close button or outside the modal
+                qrModal.addEventListener('click', function(e) {
+                    if (e.target === qrModal || e.target.classList.contains('btn-close')) {
+                        qrModal.classList.remove('show');
+                        qrModal.style.display = 'none';
+                    }
+                });
+                
+                // Close modal when pressing ESC key
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && qrModal.classList.contains('show')) {
+                        qrModal.classList.remove('show');
+                        qrModal.style.display = 'none';
+                    }
+                });
+            }
         });
     </script>
     @stack('scripts')

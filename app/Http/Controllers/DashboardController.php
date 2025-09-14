@@ -15,7 +15,19 @@ class DashboardController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $isAdmin = $user->role === 'admin';
+        $userRole = $user->role;
+        
+        // For receptionist, show a different dashboard
+        if ($userRole === 'receptionist') {
+            // Get recent visitors for receptionist dashboard
+            $visitors = \App\Models\Visitor::orderBy('check_in_time', 'desc')
+                ->take(10)
+                ->get();
+                
+            return view('dashboard.receptionist', compact('visitors'));
+        }
+        
+        $isAdmin = $userRole === 'admin';
         $threshold = Setting::getValue('communication_alert_threshold', 30);
         $thresholdDate = now()->subDays($threshold);
         

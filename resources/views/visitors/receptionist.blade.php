@@ -90,7 +90,13 @@
                                             <td>{{ $visitor->full_name }}</td>
                                             <td>{{ $visitor->contact_number }}</td>
                                             <td>{{ $visitor->host_name }}</td>
-                                            <td>{{ $visitor->check_in_time->format('M d, Y H:i:s') }}</td>
+                                            <td>
+                                                @if($visitor->check_in_time instanceof \Carbon\Carbon)
+                                                    {{ $visitor->check_in_time->format('M d, Y H:i:s') }}
+                                                @else
+                                                    {{ \Carbon\Carbon::parse($visitor->check_in_time)->format('M d, Y H:i:s') }}
+                                                @endif
+                                            </td>
                                         </tr>
                                         @endforeach
                                     </tbody>

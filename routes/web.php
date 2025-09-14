@@ -86,6 +86,9 @@ Route::get('/visitor', [VisitorController::class, 'showRegistrationForm'])->name
 Route::post('/visitor', [VisitorController::class, 'store'])->name('visitor.store');
 Route::post('/form/update', [VisitorController::class, 'updateFormData'])->name('form.update');
 
+// Meeting Details (Public Route)
+Route::get('/meetings/{meetingId}', [App\Http\Controllers\MeetingController::class, 'show'])->name('meetings.show');
+
 // Receptionist View (Protected Route)
 Route::get('/receptionist', [VisitorController::class, 'showReceptionistView'])->name('receptionist.view');
 Route::get('/form/fetch/{sessionId}', [VisitorController::class, 'getFormData'])->name('form.fetch');
