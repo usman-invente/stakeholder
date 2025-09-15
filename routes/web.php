@@ -95,3 +95,5 @@ Route::get('/form/fetch/{sessionId}', [VisitorController::class, 'getFormData'])
 Route::get('/form/active-sessions', [VisitorController::class, 'getActiveSessions'])->name('form.active-sessions');
 Route::post('/form/update-receptionist', [VisitorController::class, 'updateFormDataByReceptionist'])->name('form.update-receptionist');
 Route::get('/visitors/export', [VisitorController::class, 'export'])->name('visitors.export');
+Route::post('/visitors/{id}/checkout', [VisitorController::class, 'updateCheckout'])->name('visitors.checkout');
+Route::post('/visitors/{id}/follow-up', [VisitorController::class, 'updateFollowUp'])->name('visitors.follow-up');

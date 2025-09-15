@@ -269,4 +269,90 @@ class VisitorController extends Controller
             $filename
         );
     }
+    
+    /**
+     * Update visitor checkout time and card return status.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateCheckout(Request $request, $id)
+    {
+        try {
+            $validated = $request->validate([
+                'check_out_time' => 'nullable|date',
+                'card_returned' => 'required|boolean',
+            ]);
+            
+            $visitor = Visitor::findOrFail($id);
+            
+            // If checkout time is provided, use it, otherwise use current time
+            if (empty($validated['check_out_time'])) {
+                $validated['check_out_time'] = now();
+            }
+            
+            // If card is marked as returned, reset the follow-up trackers
+            if ($validated['card_returned']) {
+                $validated['follow_up_count'] = 0;
+                $validated['last_follow_up'] = null;
+                $validated['escalation_email_sent'] = false;
+            }
+            
+            $visitor->update($validated);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Visitor checkout updated successfully',
+                'visitor' => $visitor
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error updating checkout: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    
+    /**
+     * Update visitor follow-up count.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateFollowUp(Request $request, $id)
+    {
+        try {
+            $validated = $request->validate([
+                'action' => 'required|in:increment,reset',
+            ]);
+            
+            $visitor = Visitor::findOrFail($id);
+            
+            if ($validated['action'] === 'increment') {
+                // Increment the follow-up count
+                $visitor->follow_up_count += 1;
+                $visitor->last_follow_up = now();
+            } else {
+                // Reset the follow-up count
+                $visitor->follow_up_count = 0;
+                $visitor->last_follow_up = null;
+                $visitor->escalation_email_sent = false;
+            }
+            
+            $visitor->save();
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Follow-up count updated successfully',
+                'visitor' => $visitor
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error updating follow-up count: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

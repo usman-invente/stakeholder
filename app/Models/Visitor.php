@@ -25,6 +25,10 @@ class Visitor extends Model
         'check_out_time',
         'meeting_id',
         'email_sent',
+        'card_returned',
+        'follow_up_count',
+        'last_follow_up',
+        'escalation_email_sent',
     ];
 
     /**
@@ -37,5 +41,8 @@ class Visitor extends Model
         'check_out_time' => 'datetime:Africa/Dar_es_Salaam',
         'created_at' => 'datetime:Africa/Dar_es_Salaam',
         'updated_at' => 'datetime:Africa/Dar_es_Salaam',
+        'last_follow_up' => 'datetime:Africa/Dar_es_Salaam',
+        'card_returned' => 'boolean',
+        'escalation_email_sent' => 'boolean',
     ];
 }

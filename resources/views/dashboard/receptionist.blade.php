@@ -64,6 +64,9 @@
                                                     <th>Contact Number</th>
                                                     <th>Host</th>
                                                     <th>Check In Time</th>
+                                                    <th>Check Out</th>
+                                                    <th>Card Status</th>
+                                                    <th>Follow-up</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -80,11 +83,60 @@
                                                             {{ \Carbon\Carbon::parse($visitor->check_in_time)->format('M d, Y H:i:s') }}
                                                         @endif
                                                     </td>
+                                                    <td>
+                                                        <button type="button" 
+                                                            class="btn @if($visitor->check_out_time) btn-secondary disabled @else btn-warning @endif btn-sm checkout-btn" 
+                                                            data-visitor-id="{{ $visitor->id }}"
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target="#checkoutModal"
+                                                            @if($visitor->check_out_time) disabled @endif>
+                                                            @if($visitor->check_out_time)
+                                                                Checked Out
+                                                            @else
+                                                                Checkout
+                                                            @endif
+                                                        </button>
+                                                    </td>
+                                                    <td>
+                                                        <button type="button" 
+                                                            class="btn @if($visitor->card_returned) btn-success @else btn-danger @endif btn-sm card-status-btn" 
+                                                            data-visitor-id="{{ $visitor->id }}"
+                                                            data-card-status="{{ $visitor->card_returned ? '1' : '0' }}">
+                                                            @if($visitor->card_returned)
+                                                                Card Returned
+                                                            @else
+                                                                Card Not Returned
+                                                            @endif
+                                                        </button>
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            <span class="badge bg-{{ $visitor->follow_up_count > 0 ? ($visitor->follow_up_count > 1 ? 'danger' : 'warning') : 'secondary' }} me-2">
+                                                                {{ $visitor->follow_up_count }}
+                                                            </span>
+                                                            <div class="btn-group btn-group-sm">
+                                                                <button type="button" 
+                                                                    class="btn btn-outline-primary follow-up-btn" 
+                                                                    data-visitor-id="{{ $visitor->id }}"
+                                                                    data-action="increment"
+                                                                    title="Increment follow-up count">
+                                                                    <i class="fas fa-plus"></i>
+                                                                </button>
+                                                                <button type="button" 
+                                                                    class="btn btn-outline-secondary follow-up-btn" 
+                                                                    data-visitor-id="{{ $visitor->id }}"
+                                                                    data-action="reset"
+                                                                    title="Reset follow-up count">
+                                                                    <i class="fas fa-undo"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </td>
                                                 </tr>
                                                 @endforeach
                                                 @if(empty($visitors) || count($visitors) === 0)
                                                 <tr>
-                                                    <td colspan="5" class="text-center">No recent visitors</td>
+                                                    <td colspan="8" class="text-center">No recent visitors</td>
                                                 </tr>
                                                 @endif
                                             </tbody>
@@ -158,9 +210,46 @@
     </div>
   </div>
 </div>
+
+<!-- Checkout Modal -->
+<div class="modal fade" id="checkoutModal" tabindex="-1" aria-labelledby="checkoutModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="checkoutModalLabel">Visitor Checkout</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="checkoutForm">
+          <input type="hidden" id="visitor_id" name="visitor_id">
+          <div class="mb-3">
+            <label for="checkout_time" class="form-label">Checkout Time</label>
+            <input type="datetime-local" class="form-control" id="checkout_time" name="checkout_time">
+            <div class="form-text">Leave blank to use current time</div>
+          </div>
+          <div class="mb-3">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="card_returned" name="card_returned" value="1">
+              <label class="form-check-label" for="card_returned">
+                Card Returned
+              </label>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="saveCheckoutBtn">
+          <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true" id="checkoutSpinner"></span>
+          Save Checkout
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 @endsection
 
-@section('scripts')
+@push('scripts')
 <script>
     // Set default dates for export modal
     document.addEventListener('DOMContentLoaded', function() {
@@ -199,5 +288,261 @@
             }
         }
     });
+
+    $(document).ready(function() {
+        console.log('Document ready - initializing checkout functionality');
+        
+        // Checkout Modal handling
+        $(document).on('click', '.checkout-btn', function() {
+            console.log('Checkout button clicked');
+            const visitorId = $(this).data('visitor-id');
+            console.log('Visitor ID:', visitorId);
+            $('#visitor_id').val(visitorId);
+            
+            // Set default checkout time to now
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            
+            const formattedNow = `${year}-${month}-${day}T${hours}:${minutes}`;
+            $('#checkout_time').val(formattedNow);
+        });
+        
+        // Handle Checkout Form Submission
+        $(document).on('click', '#saveCheckoutBtn', function() {
+            console.log('Save checkout button clicked');
+            const visitorId = $('#visitor_id').val();
+            const checkoutTime = $('#checkout_time').val();
+            const cardReturned = $('#card_returned').is(':checked') ? 1 : 0;
+            
+            console.log('Form data:', {
+                visitorId: visitorId,
+                checkoutTime: checkoutTime,
+                cardReturned: cardReturned
+            });
+            
+            // Show spinner
+            $('#checkoutSpinner').removeClass('d-none');
+            $(this).prop('disabled', true);
+            
+            $.ajax({
+                url: "{{ url('/visitors') }}/" + visitorId + "/checkout",
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': "{{ csrf_token() }}"
+                },
+                data: {
+                    check_out_time: checkoutTime,
+                    card_returned: cardReturned
+                },
+                success: function(response) {
+                    console.log('Success response:', response);
+                    if (response.success) {
+                        // Hide modal
+                        $('#checkoutModal').modal('hide');
+                        
+                        // Show success message
+                        const alertHtml = `
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                Visitor checkout updated successfully!
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        `;
+                        $('.card-body').first().prepend(alertHtml);
+                            
+                        // Refresh the page to show updated visitor list
+                        setTimeout(function() {
+                            location.reload();
+                        }, 1500);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', xhr, status, error);
+                    // Show error message
+                    const alertHtml = `
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            Error updating checkout: ${xhr.responseText}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    `;
+                    $('#checkoutModal .modal-body').prepend(alertHtml);
+                },
+                complete: function() {
+                    // Hide spinner
+                    $('#checkoutSpinner').addClass('d-none');
+                    $('#saveCheckoutBtn').prop('disabled', false);
+                }
+            });
+        });
+        
+        // Handle Card Status Toggle
+        $(document).on('click', '.card-status-btn', function() {
+            console.log('Card status button clicked');
+            const visitorId = $(this).data('visitor-id');
+            const currentStatus = $(this).data('card-status');
+            const newStatus = currentStatus == '1' ? 0 : 1;
+            const $button = $(this);
+            
+            console.log('Card status data:', {
+                visitorId: visitorId,
+                currentStatus: currentStatus,
+                newStatus: newStatus
+            });
+            
+            // Disable button during update
+            $button.prop('disabled', true);
+            
+            $.ajax({
+                url: "{{ url('/visitors') }}/" + visitorId + "/checkout",
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': "{{ csrf_token() }}"
+                },
+                data: {
+                    card_returned: newStatus
+                },
+                success: function(response) {
+                    console.log('Success response:', response);
+                    if (response.success) {
+                        // Update button appearance and data attribute
+                        if (newStatus) {
+                            $button.removeClass('btn-danger').addClass('btn-success').text('Card Returned');
+                        } else {
+                            $button.removeClass('btn-success').addClass('btn-danger').text('Card Not Returned');
+                        }
+                        $button.data('card-status', newStatus.toString());
+                        
+                        // Show success toast/alert
+                        const alertHtml = `
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                Card status updated successfully!
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        `;
+                        $('.card-body').first().prepend(alertHtml);
+                        
+                        // Auto-dismiss the alert after 3 seconds
+                        setTimeout(function() {
+                            $('.alert-success').fadeOut(function() {
+                                $(this).remove();
+                            });
+                        }, 3000);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', xhr, status, error);
+                    // Show error message
+                    const alertHtml = `
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            Error updating card status: ${xhr.responseText}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    `;
+                    $('.card-body').first().prepend(alertHtml);
+                    
+                    // Auto-dismiss the alert after 3 seconds
+                    setTimeout(function() {
+                        $('.alert-danger').fadeOut(function() {
+                            $(this).remove();
+                        });
+                    }, 3000);
+                },
+                complete: function() {
+                    // Re-enable button
+                    $button.prop('disabled', false);
+                }
+            });
+        });
+        
+        // Handle Follow-up Count Updates
+        $(document).on('click', '.follow-up-btn', function() {
+            console.log('Follow-up button clicked');
+            const visitorId = $(this).data('visitor-id');
+            const action = $(this).data('action');
+            const $button = $(this);
+            
+            console.log('Follow-up data:', {
+                visitorId: visitorId,
+                action: action
+            });
+            
+            // Disable button during update
+            $button.prop('disabled', true);
+            
+            $.ajax({
+                url: "{{ url('/visitors') }}/" + visitorId + "/follow-up",
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': "{{ csrf_token() }}"
+                },
+                data: {
+                    action: action
+                },
+                success: function(response) {
+                    console.log('Success response:', response);
+                    if (response.success) {
+                        // Update the follow-up count display in the table cell
+                        const newCount = response.visitor.follow_up_count;
+                        const visitorRow = $button.closest('tr');
+                        const followUpBadge = visitorRow.find('td .badge');
+                        
+                        // Update the badge text
+                        followUpBadge.text(newCount);
+                        
+                        // Update the badge color based on the count
+                        followUpBadge.removeClass('bg-secondary bg-warning bg-danger');
+                        if (newCount > 1) {
+                            followUpBadge.addClass('bg-danger');
+                        } else if (newCount == 1) {
+                            followUpBadge.addClass('bg-warning');
+                        } else {
+                            followUpBadge.addClass('bg-secondary');
+                        }
+                        
+                        // Show success toast/alert
+                        const alertHtml = `
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                Follow-up count updated successfully!
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        `;
+                        $('.card-body').first().prepend(alertHtml);
+                        
+                        // Auto-dismiss the alert after 3 seconds
+                        setTimeout(function() {
+                            $('.alert-success').fadeOut(function() {
+                                $(this).remove();
+                            });
+                        }, 3000);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', xhr, status, error);
+                    // Show error message
+                    const alertHtml = `
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            Error updating follow-up count: ${xhr.responseText}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    `;
+                    $('.card-body').first().prepend(alertHtml);
+                    
+                    // Auto-dismiss the alert after 3 seconds
+                    setTimeout(function() {
+                        $('.alert-danger').fadeOut(function() {
+                            $(this).remove();
+                        });
+                    }, 3000);
+                },
+                complete: function() {
+                    // Re-enable button
+                    $button.prop('disabled', false);
+                }
+            });
+        });
+    });
 </script>
-@endsection
+@endpush

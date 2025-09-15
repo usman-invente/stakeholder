@@ -90,6 +90,8 @@
                                             <th>Contact Number</th>
                                             <th>Host</th>
                                             <th>Check In Time</th>
+                                            <th>Checkout</th>
+                                            <th>Card Status</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -105,6 +107,32 @@
                                                 @else
                                                     {{ \Carbon\Carbon::parse($visitor->check_in_time)->format('M d, Y H:i:s') }}
                                                 @endif
+                                            </td>
+                                            <td>
+                                                <button type="button" 
+                                                    class="btn @if($visitor->check_out_time) btn-secondary disabled @else btn-warning @endif btn-sm checkout-btn" 
+                                                    data-visitor-id="{{ $visitor->id }}"
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#checkoutModal"
+                                                    @if($visitor->check_out_time) disabled @endif>
+                                                    @if($visitor->check_out_time)
+                                                        Checked Out
+                                                    @else
+                                                        Checkout
+                                                    @endif
+                                                </button>
+                                            </td>
+                                            <td>
+                                                <button type="button" 
+                                                    class="btn @if($visitor->card_returned) btn-success @else btn-danger @endif btn-sm card-status-btn" 
+                                                    data-visitor-id="{{ $visitor->id }}"
+                                                    data-card-status="{{ $visitor->card_returned ? '1' : '0' }}">
+                                                    @if($visitor->card_returned)
+                                                        Card Returned
+                                                    @else
+                                                        Card Not Returned
+                                                    @endif
+                                                </button>
                                             </td>
                                         </tr>
                                         @endforeach
@@ -147,6 +175,43 @@
           </button>
         </div>
       </form>
+    </div>
+  </div>
+</div>
+
+<!-- Checkout Modal -->
+<div class="modal fade" id="checkoutModal" tabindex="-1" aria-labelledby="checkoutModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="checkoutModalLabel">Visitor Checkout</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="checkoutForm">
+          <input type="hidden" id="visitor_id" name="visitor_id">
+          <div class="mb-3">
+            <label for="checkout_time" class="form-label">Checkout Time</label>
+            <input type="datetime-local" class="form-control" id="checkout_time" name="checkout_time">
+            <div class="form-text">Leave blank to use current time</div>
+          </div>
+          <div class="mb-3">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="card_returned" name="card_returned" value="1">
+              <label class="form-check-label" for="card_returned">
+                Card Returned
+              </label>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="saveCheckoutBtn">
+          <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true" id="checkoutSpinner"></span>
+          Save Checkout
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -454,6 +519,137 @@
             
             $('#start_date').val(formatDate(thirtyDaysAgo));
             $('#end_date').val(formatDate(today));
+        });
+        
+        // Checkout Modal Functionality
+        $('.checkout-btn').on('click', function() {
+            const visitorId = $(this).data('visitor-id');
+            $('#visitor_id').val(visitorId);
+            
+            // Set default checkout time to now
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            
+            const formattedNow = `${year}-${month}-${day}T${hours}:${minutes}`;
+            $('#checkout_time').val(formattedNow);
+        });
+        
+        // Handle Checkout Form Submission
+        $('#saveCheckoutBtn').on('click', function() {
+            const visitorId = $('#visitor_id').val();
+            const checkoutTime = $('#checkout_time').val();
+            const cardReturned = $('#card_returned').is(':checked') ? 1 : 0;
+            
+            // Show spinner
+            $('#checkoutSpinner').removeClass('d-none');
+            $(this).prop('disabled', true);
+            
+            $.ajax({
+                url: `/visitors/${visitorId}/checkout`,
+                method: 'POST',
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    check_out_time: checkoutTime,
+                    card_returned: cardReturned
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Hide modal
+                        $('#checkoutModal').modal('hide');
+                        
+                        // Show success message
+                        $('<div class="alert alert-success alert-dismissible fade show" role="alert">')
+                            .text('Visitor checkout updated successfully!')
+                            .append('<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>')
+                            .prependTo('.card-body')
+                            .delay(3000)
+                            .fadeOut(function() {
+                                $(this).remove();
+                            });
+                            
+                        // Refresh the page to show updated visitor list
+                        setTimeout(function() {
+                            location.reload();
+                        }, 1500);
+                    }
+                },
+                error: function() {
+                    // Show error message
+                    $('<div class="alert alert-danger alert-dismissible fade show" role="alert">')
+                        .text('Error updating checkout. Please try again.')
+                        .append('<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>')
+                        .prependTo('#checkoutModal .modal-body')
+                        .delay(3000)
+                        .fadeOut(function() {
+                            $(this).remove();
+                        });
+                },
+                complete: function() {
+                    // Hide spinner
+                    $('#checkoutSpinner').addClass('d-none');
+                    $('#saveCheckoutBtn').prop('disabled', false);
+                }
+            });
+        });
+        
+        // Handle Card Status Toggle
+        $('.card-status-btn').on('click', function() {
+            const visitorId = $(this).data('visitor-id');
+            const currentStatus = $(this).data('card-status');
+            const newStatus = currentStatus == '1' ? 0 : 1;
+            const $button = $(this);
+            
+            // Disable button during update
+            $button.prop('disabled', true);
+            
+            $.ajax({
+                url: `/visitors/${visitorId}/checkout`,
+                method: 'POST',
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    card_returned: newStatus
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Update button appearance and data attribute
+                        if (newStatus) {
+                            $button.removeClass('btn-danger').addClass('btn-success').text('Card Returned');
+                        } else {
+                            $button.removeClass('btn-success').addClass('btn-danger').text('Card Not Returned');
+                        }
+                        $button.data('card-status', newStatus.toString());
+                        
+                        // Show success toast/alert
+                        $('<div class="alert alert-success alert-dismissible fade show" role="alert">')
+                            .text('Card status updated successfully!')
+                            .append('<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>')
+                            .prependTo('.card-body')
+                            .delay(3000)
+                            .fadeOut(function() {
+                                $(this).remove();
+                            });
+                    }
+                },
+                error: function() {
+                    // Show error message
+                    $('<div class="alert alert-danger alert-dismissible fade show" role="alert">')
+                        .text('Error updating card status. Please try again.')
+                        .append('<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>')
+                        .prependTo('.card-body')
+                        .delay(3000)
+                        .fadeOut(function() {
+                            $(this).remove();
+                        });
+                },
+                complete: function() {
+                    // Re-enable button
+                    $button.prop('disabled', false);
+                }
+            });
         });
     });
 </script>
