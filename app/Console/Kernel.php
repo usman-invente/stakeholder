@@ -9,6 +9,8 @@ class Kernel extends ConsoleKernel
 {
     protected $commands = [
         Commands\CheckStakeholderCommunications::class,
+        Commands\CheckUnreturnedCards::class,
+        Commands\SendWeeklyVisitorSummary::class,
     ];
 
     protected function schedule(Schedule $schedule)
