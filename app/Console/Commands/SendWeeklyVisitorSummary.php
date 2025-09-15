@@ -104,7 +104,6 @@ class SendWeeklyVisitorSummary extends Command
         
         try {
             Mail::to('management@dsmcorridor.com')
-                ->bcc(['usman.traximtech@gmail.com']) // Add BCC for monitoring purposes
                 ->send(new \App\Mail\WeeklyVisitorSummary($visitors, $statistics));
             
             $this->info('Weekly visitor summary email sent successfully to management@dsmcorridor.com');
