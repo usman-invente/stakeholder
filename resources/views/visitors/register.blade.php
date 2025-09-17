@@ -55,6 +55,28 @@
                         </div>
 
                         <div class="form-group row mb-3">
+                            <label for="coming_from_company" class="col-md-4 col-form-label text-md-end">From which company are you coming? *</label>
+                            <div class="col-md-6">
+                                <input id="coming_from_company" type="text" class="form-control @error('coming_from_company') is-invalid @enderror" name="coming_from_company" value="{{ old('coming_from_company') }}" required>
+                                <span class="invalid-feedback" role="alert" id="coming_from_company-error"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group row mb-3">
+                            <label for="visiting_company" class="col-md-4 col-form-label text-md-end">Visiting Company *</label>
+                            <div class="col-md-6">
+                                <select id="visiting_company" class="form-select @error('visiting_company') is-invalid @enderror" name="visiting_company" required>
+                                    <option value="">Select Company</option>
+                                    <option value="DSM Corridor Group Co. Ltd">DSM Corridor Group Co. Ltd</option>
+                                    <option value="Manchinchi Movers">Manchinchi Movers</option>
+                                    <option value="Galla Logistics">Galla Logistics</option>
+                                    <option value="Scan Global">Scan Global</option>
+                                </select>
+                                <span class="invalid-feedback" role="alert" id="visiting_company-error"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group row mb-3">
                             <label for="host_name" class="col-md-4 col-form-label text-md-end">Host Name *</label>
                             <div class="col-md-6">
                                 <input id="host_name" type="text" class="form-control @error('host_name') is-invalid @enderror" name="host_name" value="{{ old('host_name') }}" required>
@@ -167,19 +189,19 @@
         }
         
         // Input event handlers for real-time updates
-        $('#guestForm input').on('focus', function() {
+        $('#guestForm input, #guestForm select').on('focus', function() {
             // Set flag that user is editing
             isEditing = true;
             focusedFieldId = $(this).attr('id');
         });
         
-        $('#guestForm input').on('blur', function() {
+        $('#guestForm input, #guestForm select').on('blur', function() {
             // User has finished editing
             isEditing = false;
             focusedFieldId = null;
         });
         
-        $('#guestForm input').on('input', function() {
+        $('#guestForm input, #guestForm select').on('input change', function() {
             let formData = $('#guestForm').serializeArray();
             lastUpdateTime = new Date().getTime(); // Update the last edit time
             

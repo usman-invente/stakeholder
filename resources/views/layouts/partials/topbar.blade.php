@@ -53,11 +53,13 @@
                                     <i class="fas fa-users me-2"></i> Manage Users
                                 </a>
                             </li>
+                            @if(Auth::user()->role === 'receptionist')
                             <li>
                                 <a class="dropdown-item py-2" href="{{ route('stakeholders.index') }}">
                                     <i class="fas fa-handshake me-2"></i> Manage Stakeholders
                                 </a>
                             </li>
+                            @endif
                             
                         @endif
                         <li>

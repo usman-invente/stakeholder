@@ -36,8 +36,10 @@
         <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
             <div class="container">
                 <a class="navbar-brand" href="/">
-                    <img src="{{ asset('images/logo.png') }}" alt="{{ config('app.name', 'Laravel') }} Logo">
-                    {{ config('app.name', 'Laravel') }}
+                    @if(request()->is('receptionist') || request()->is('receptionist/*') || request()->is('visitors/export'))
+                        <img style="width: 100px;height: 100px;" src="{{ asset('/public/images/DCG_LOGO.png') }}" alt="{{ config('app.name', 'Laravel') }} Logo">
+                    
+                    @endif
                 </a>
             </div>
         </nav>

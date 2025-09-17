@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Visitor extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
     
     /**
      * The timezone for date attributes.
@@ -19,6 +20,8 @@ class Visitor extends Model
         'email',
         'card_no',
         'contact_number',
+        'coming_from_company',
+        'visiting_company',
         'host_name',
         'host_email',
         'check_in_time',
@@ -42,6 +45,7 @@ class Visitor extends Model
         'created_at' => 'datetime:Africa/Dar_es_Salaam',
         'updated_at' => 'datetime:Africa/Dar_es_Salaam',
         'last_follow_up' => 'datetime:Africa/Dar_es_Salaam',
+        'deleted_at' => 'datetime:Africa/Dar_es_Salaam',
         'card_returned' => 'boolean',
         'escalation_email_sent' => 'boolean',
     ];

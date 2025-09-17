@@ -47,11 +47,25 @@
                                         <label for="display-card_no" class="form-label"><strong>ID/Card Number:</strong></label>
                                         <input type="text" class="form-control" id="display-card_no" name="card_no">
                                     </div>
+                                    <div class="mb-3">
+                                        <label for="display-visiting_company" class="form-label"><strong>Visiting Company:</strong></label>
+                                        <select class="form-select" id="display-visiting_company" name="visiting_company">
+                                            <option value="">Select Company</option>
+                                            <option value="DSM Corridor Group Co. Ltd">DSM Corridor Group Co. Ltd</option>
+                                            <option value="Manchinchi Movers">Manchinchi Movers</option>
+                                            <option value="Galla Logistics">Galla Logistics</option>
+                                            <option value="Scan Global">Scan Global</option>
+                                        </select>
+                                    </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label for="display-contact_number" class="form-label"><strong>Contact Number:</strong></label>
                                         <input type="text" class="form-control" id="display-contact_number" name="contact_number">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="display-coming_from_company" class="form-label"><strong>Coming From Company:</strong></label>
+                                        <input type="text" class="form-control" id="display-coming_from_company" name="coming_from_company">
                                     </div>
                                     <div class="mb-3">
                                         <label for="display-host_name" class="form-label"><strong>Host Name:</strong></label>
@@ -88,6 +102,8 @@
                                             <th>#</th>
                                             <th>Name</th>
                                             <th>Contact Number</th>
+                                            <th>Coming From</th>
+                                            <th>Visiting Company</th>
                                             <th>Host</th>
                                             <th>Check In Time</th>
                                             <th>Checkout</th>
@@ -100,6 +116,8 @@
                                             <td>{{ $index + 1 }}</td>
                                             <td>{{ $visitor->full_name }}</td>
                                             <td>{{ $visitor->contact_number }}</td>
+                                            <td>{{ $visitor->coming_from_company }}</td>
+                                            <td>{{ $visitor->visiting_company }}</td>
                                             <td>{{ $visitor->host_name }}</td>
                                             <td>
                                                 @if($visitor->check_in_time instanceof \Carbon\Carbon)
@@ -332,18 +350,30 @@
                     let element = $('#display-' + field.name);
                     
                     // Only update if the field is not currently focused by receptionist
-                    if (element.length && element.val() !== field.value && focusedFieldId !== element.attr('id')) {
+                    if (element.length && focusedFieldId !== element.attr('id')) {
                         const oldValue = element.val();
                         const newValue = field.value || '';
                         
-                        // Update the field value
-                        element.val(newValue);
-                        
-                        // Highlight the field that changed
-                        element.addClass('bg-warning');
-                        setTimeout(function() {
-                            element.removeClass('bg-warning');
-                        }, 1000);
+                        // Update the field value based on element type (input or select)
+                        if (element.is('select')) {
+                            // For select elements, we need to select the correct option
+                            if (oldValue !== newValue) {
+                                element.val(newValue);
+                                element.addClass('bg-warning');
+                                setTimeout(function() {
+                                    element.removeClass('bg-warning');
+                                }, 1000);
+                            }
+                        } else {
+                            // For input elements
+                            if (oldValue !== newValue) {
+                                element.val(newValue);
+                                element.addClass('bg-warning');
+                                setTimeout(function() {
+                                    element.removeClass('bg-warning');
+                                }, 1000);
+                            }
+                        }
                     }
                 }
             });
@@ -369,13 +399,13 @@
         });
         
         // Track field focus/blur
-        $('#liveDataForm input').on('focus', function() {
+        $('#liveDataForm input, #liveDataForm select').on('focus', function() {
             focusedFieldId = $(this).attr('id');
             // Add a visual indicator that receptionist is editing this field
             $(this).addClass('border-primary');
         });
         
-        $('#liveDataForm input').on('blur', function() {
+        $('#liveDataForm input, #liveDataForm select').on('blur', function() {
             // When leaving a field, submit the updated value
             let fieldName = $(this).attr('name');
             let fieldValue = $(this).val();
@@ -456,9 +486,9 @@
         const doneTypingInterval = 500;  // Time in ms (0.5 seconds)
         
         // On keyup, start the countdown
-        $('#liveDataForm input').on('keyup', function() {
+        $('#liveDataForm input, #liveDataForm select').on('keyup change', function() {
             clearTimeout(typingTimer);
-            if ($(this).val()) {
+            if ($(this).val() !== undefined) {
                 const $this = $(this);
                 typingTimer = setTimeout(function() {
                     // Send update only after user has stopped typing
@@ -499,7 +529,7 @@
         });
         
         // On keydown, clear the countdown 
-        $('#liveDataForm input').on('keydown', function() {
+        $('#liveDataForm input, #liveDataForm select').on('keydown', function() {
             clearTimeout(typingTimer);
         });
         

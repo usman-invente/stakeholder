@@ -91,6 +91,22 @@
                 <span class="detail-label">Check-in Time:</span>
                 <span>{{ $visitor->check_in_time->format('F j, Y, g:i a') }}</span>
             </div>
+
+            <div class="detail-row">
+                <span class="detail-label">Visiting Company:</span>
+                <span>{{ $visitor->visiting_company }}</span>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label">Coming From Company:</span>
+                <span>{{ $visitor->coming_from_company }}</span>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label">Card No:</span>
+                <span>{{ $visitor->card_no }}</span>
+            </div>
+
         </div>
         
         <p>Please use the QR code attached to this email or click the button below to view the meeting details.</p>

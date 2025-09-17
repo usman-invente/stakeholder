@@ -97,3 +97,4 @@ Route::post('/form/update-receptionist', [VisitorController::class, 'updateFormD
 Route::get('/visitors/export', [VisitorController::class, 'export'])->name('visitors.export');
 Route::post('/visitors/{id}/checkout', [VisitorController::class, 'updateCheckout'])->name('visitors.checkout');
 Route::post('/visitors/{id}/follow-up', [VisitorController::class, 'updateFollowUp'])->name('visitors.follow-up');
+Route::delete('/visitors/{id}', [VisitorController::class, 'destroy'])->name('visitors.destroy');

@@ -38,6 +38,8 @@ class VisitorController extends Controller
             'email' => 'nullable|email|max:255',
             'card_no' => 'nullable|string|max:50',
             'contact_number' => 'required|string|max:20',
+            'coming_from_company' => 'required|string|max:255',
+            'visiting_company' => 'required|string|max:255',
             'host_name' => 'required|string|max:255',
             'host_email' => 'required|email|max:255',
         ]);
@@ -352,6 +354,30 @@ class VisitorController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Error updating follow-up count: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    
+    /**
+     * Delete a visitor record (soft delete).
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function destroy($id)
+    {
+        try {
+            $visitor = Visitor::findOrFail($id);
+            $visitor->delete();
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Visitor deleted successfully'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error deleting visitor: ' . $e->getMessage()
             ], 500);
         }
     }

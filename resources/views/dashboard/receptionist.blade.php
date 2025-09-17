@@ -30,15 +30,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-4 mb-4">
-                            <div class="card bg-primary text-white h-100">
-                                <div class="card-body d-flex flex-column">
-                                    <h5 class="card-title"><i class="fas fa-qrcode fa-fw"></i> Registration QR Code</h5>
-                                    <p class="card-text flex-grow-1">Display a QR code for visitors to scan for self-registration.</p>
-                                    <button data-bs-toggle="modal" data-bs-target="#qr-code-modal" class="btn btn-light mt-3">Show QR Code</button>
-                                </div>
-                            </div>
-                        </div>
+                        
                     </div>
                     
                     <div class="row mt-4">
@@ -62,11 +54,13 @@
                                                     <th>#</th>
                                                     <th>Name</th>
                                                     <th>Contact Number</th>
+                                                    <th>Visiting Company</th>
                                                     <th>Host</th>
                                                     <th>Check In Time</th>
                                                     <th>Check Out</th>
                                                     <th>Card Status</th>
                                                     <th>Follow-up</th>
+                                                    <th>Actions</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -75,6 +69,7 @@
                                                     <td>{{ $index + 1 }}</td>
                                                     <td>{{ $visitor->full_name }}</td>
                                                     <td>{{ $visitor->contact_number }}</td>
+                                                    <td>{{ $visitor->visiting_company ?? 'N/A' }}</td>
                                                     <td>{{ $visitor->host_name }}</td>
                                                     <td>
                                                         @if($visitor->check_in_time instanceof \Carbon\Carbon)
@@ -132,11 +127,19 @@
                                                             </div>
                                                         </div>
                                                     </td>
+                                                    <td>
+                                                        <button type="button" 
+                                                            class="btn btn-danger btn-sm delete-visitor-btn" 
+                                                            data-visitor-id="{{ $visitor->id }}"
+                                                            title="Delete Visitor">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </td>
                                                 </tr>
                                                 @endforeach
                                                 @if(empty($visitors) || count($visitors) === 0)
                                                 <tr>
-                                                    <td colspan="8" class="text-center">No recent visitors</td>
+                                                    <td colspan="10" class="text-center">No recent visitors</td>
                                                 </tr>
                                                 @endif
                                             </tbody>
@@ -542,6 +545,79 @@
                     $button.prop('disabled', false);
                 }
             });
+        });
+        
+        // Handle Visitor Deletion
+        $(document).on('click', '.delete-visitor-btn', function() {
+            console.log('Delete button clicked');
+            const visitorId = $(this).data('visitor-id');
+            const $button = $(this);
+            const $row = $button.closest('tr');
+            
+            // Show confirmation dialog
+            if (confirm('Are you sure you want to delete this visitor record? This action cannot be undone.')) {
+                // Disable button during deletion
+                $button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>');
+                
+                $.ajax({
+                    url: "{{ url('/visitors') }}/" + visitorId,
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': "{{ csrf_token() }}"
+                    },
+                    success: function(response) {
+                        console.log('Success response:', response);
+                        if (response.success) {
+                            // Fade out and remove the row
+                            $row.fadeOut('slow', function() {
+                                $(this).remove();
+                                
+                                // Check if table is now empty
+                                if ($('table tbody tr').length === 0) {
+                                    $('table tbody').append('<tr><td colspan="9" class="text-center">No recent visitors</td></tr>');
+                                }
+                            });
+                            
+                            // Show success toast/alert
+                            const alertHtml = `
+                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                    Visitor deleted successfully!
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            `;
+                            $('.card-body').first().prepend(alertHtml);
+                            
+                            // Auto-dismiss the alert after 3 seconds
+                            setTimeout(function() {
+                                $('.alert-success').fadeOut(function() {
+                                    $(this).remove();
+                                });
+                            }, 3000);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error:', xhr, status, error);
+                        // Show error message
+                        const alertHtml = `
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                Error deleting visitor: ${xhr.responseText}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        `;
+                        $('.card-body').first().prepend(alertHtml);
+                        
+                        // Auto-dismiss the alert after 3 seconds
+                        setTimeout(function() {
+                            $('.alert-danger').fadeOut(function() {
+                                $(this).remove();
+                            });
+                        }, 3000);
+                        
+                        // Re-enable button
+                        $button.prop('disabled', false).html('<i class="fas fa-trash"></i>');
+                    }
+                });
+            }
         });
     });
 </script>
