@@ -47,7 +47,7 @@
                         </div>
 
                         <div class="form-group row mb-3">
-                            <label for="contact_number" class="col-md-4 col-form-label text-md-end">Contact Number *</label>
+                            <label for="contact_number" class="col-md-4 col-form-label text-md-end">Mobile Number *</label>
                             <div class="col-md-6">
                                 <input id="contact_number" type="text" class="form-control @error('contact_number') is-invalid @enderror" name="contact_number" value="{{ old('contact_number') }}" required>
                                 <span class="invalid-feedback" role="alert" id="contact_number-error"></span>
@@ -55,7 +55,7 @@
                         </div>
 
                         <div class="form-group row mb-3">
-                            <label for="coming_from_company" class="col-md-4 col-form-label text-md-end">From which company are you coming? *</label>
+                            <label for="coming_from_company" class="col-md-4 col-form-label text-md-end">Which company are you working for? *</label>
                             <div class="col-md-6">
                                 <input id="coming_from_company" type="text" class="form-control @error('coming_from_company') is-invalid @enderror" name="coming_from_company" value="{{ old('coming_from_company') }}" required>
                                 <span class="invalid-feedback" role="alert" id="coming_from_company-error"></span>
@@ -68,9 +68,11 @@
                                 <select id="visiting_company" class="form-select @error('visiting_company') is-invalid @enderror" name="visiting_company" required>
                                     <option value="">Select Company</option>
                                     <option value="DSM Corridor Group Co. Ltd">DSM Corridor Group Co. Ltd</option>
-                                    <option value="Manchinchi Movers">Manchinchi Movers</option>
+                                    <option value="DSM Corridor Ships Chandelling Ltd">DSM Corridor Ships Chandelling Ltd</option>
+
+                                    <option value="Manchinchi Marine Movers">  Manchinchi Marine Movers</option>
                                     <option value="Galla Logistics">Galla Logistics</option>
-                                    <option value="Scan Global">Scan Global</option>
+                                    <option value="Scan Global Logistics">Scan Global Logistics</option>
                                 </select>
                                 <span class="invalid-feedback" role="alert" id="visiting_company-error"></span>
                             </div>

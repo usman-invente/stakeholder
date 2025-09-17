@@ -52,19 +52,20 @@
                                         <select class="form-select" id="display-visiting_company" name="visiting_company">
                                             <option value="">Select Company</option>
                                             <option value="DSM Corridor Group Co. Ltd">DSM Corridor Group Co. Ltd</option>
-                                            <option value="Manchinchi Movers">Manchinchi Movers</option>
+                                             <option value="DSM Corridor Ships Chandelling Ltd">DSM Corridor Ships Chandelling Ltd</option>
+                                            <option value="  Manchinchi Marine Movers">  Manchinchi Marine Movers</option>
                                             <option value="Galla Logistics">Galla Logistics</option>
-                                            <option value="Scan Global">Scan Global</option>
+                                            <option value="Scan Global Logistics">Scan Global Logistics</option>
                                         </select>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label for="display-contact_number" class="form-label"><strong>Contact Number:</strong></label>
+                                        <label for="display-contact_number" class="form-label"><strong>Mobile Number:</strong></label>
                                         <input type="text" class="form-control" id="display-contact_number" name="contact_number">
                                     </div>
                                     <div class="mb-3">
-                                        <label for="display-coming_from_company" class="form-label"><strong>Coming From Company:</strong></label>
+                                        <label for="display-coming_from_company" class="form-label"><strong>Which company are you working for:</strong></label>
                                         <input type="text" class="form-control" id="display-coming_from_company" name="coming_from_company">
                                     </div>
                                     <div class="mb-3">
