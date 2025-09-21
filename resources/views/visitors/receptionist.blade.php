@@ -103,6 +103,7 @@
                                             <th>#</th>
                                             <th>Name</th>
                                             <th>Contact Number</th>
+                                            <th>Card No</th>
                                             <th>Coming From</th>
                                             <th>Visiting Company</th>
                                             <th>Host</th>
@@ -117,6 +118,7 @@
                                             <td>{{ $index + 1 }}</td>
                                             <td>{{ $visitor->full_name }}</td>
                                             <td>{{ $visitor->contact_number }}</td>
+                                            <td>{{ $visitor->card_no }}</td>
                                             <td>{{ $visitor->coming_from_company }}</td>
                                             <td>{{ $visitor->visiting_company }}</td>
                                             <td>{{ $visitor->host_name }}</td>

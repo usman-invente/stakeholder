@@ -54,6 +54,7 @@
                                                     <th>#</th>
                                                     <th>Name</th>
                                                     <th>Contact Number</th>
+                                                    <th>Card No</th>
                                                     <th>Visiting Company</th>
                                                     <th>Host</th>
                                                     <th>Check In Time</th>
@@ -69,6 +70,7 @@
                                                     <td>{{ $index + 1 }}</td>
                                                     <td>{{ $visitor->full_name }}</td>
                                                     <td>{{ $visitor->contact_number }}</td>
+                                                    <td>{{ $visitor->card_no ?? 'N/A' }}</td>
                                                     <td>{{ $visitor->visiting_company ?? 'N/A' }}</td>
                                                     <td>{{ $visitor->host_name }}</td>
                                                     <td>
