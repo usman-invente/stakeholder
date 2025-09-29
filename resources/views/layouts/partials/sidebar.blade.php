@@ -47,6 +47,12 @@
                     <i class="fas fa-chart-bar me-2"></i> <span class="nav-text">Monthly Engagements Report</span>
                 </a>
             </li>
+            
+            <li class="nav-item">
+                <a class="nav-link text-white {{ Request::is('contracts*') ? 'active bg-primary' : '' }}" href="{{ route('contracts.dashboard') }}">
+                    <i class="fas fa-file-contract me-2"></i> <span class="nav-text">Contract Management</span>
+                </a>
+            </li>
         @endif
     </ul>
 </div>

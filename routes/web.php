@@ -4,6 +4,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\StakeholderController;
 use App\Http\Controllers\StakeholderCommunicationController;
+use App\Http\Controllers\ContractController;
+use App\Http\Controllers\ContractReportController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\MailTestController;
@@ -74,6 +76,33 @@ Route::middleware(['auth'])->group(function () {
             ->name('stakeholder-communications.update');
         Route::delete('stakeholders/{stakeholder}/communications/{communication}', [StakeholderCommunicationController::class, 'destroy'])
             ->name('stakeholder-communications.destroy');
+
+        // Contract Management Routes
+        Route::get('contracts/dashboard', [ContractController::class, 'dashboard'])
+            ->name('contracts.dashboard');
+        Route::get('contracts/reports', [App\Http\Controllers\ContractReportController::class, 'index'])
+            ->name('contracts.reports');
+        Route::get('contracts/reports/export', [App\Http\Controllers\ContractReportController::class, 'export'])
+            ->name('contracts.reports.export');
+        Route::get('contracts/reports/{year}/{month}', [App\Http\Controllers\ContractReportController::class, 'monthlyDetail'])
+            ->name('contracts.reports.monthly');
+        Route::get('contracts/generate-id', [ContractController::class, 'generateId'])
+            ->name('contracts.generate-id');
+        Route::get('contracts/{contract}/download', [ContractController::class, 'downloadDocument'])
+            ->name('contracts.download');
+        Route::resource('contracts', ContractController::class);
+        
+        // Department Management Routes (for adding more departments)
+        Route::get('departments', [App\Http\Controllers\DepartmentController::class, 'index'])
+            ->name('departments.index');
+        Route::post('departments', [App\Http\Controllers\DepartmentController::class, 'store'])
+            ->name('departments.store');
+        Route::put('departments/{department}', [App\Http\Controllers\DepartmentController::class, 'update'])
+            ->name('departments.update');
+        Route::post('departments/{department}/toggle', [App\Http\Controllers\DepartmentController::class, 'toggleStatus'])
+            ->name('departments.toggle');
+        Route::delete('departments/{department}', [App\Http\Controllers\DepartmentController::class, 'destroy'])
+            ->name('departments.destroy');
     });
 });
 
