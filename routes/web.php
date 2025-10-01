@@ -118,12 +118,14 @@ Route::post('/form/update', [VisitorController::class, 'updateFormData'])->name(
 // Meeting Details (Public Route)
 Route::get('/meetings/{meetingId}', [App\Http\Controllers\MeetingController::class, 'show'])->name('meetings.show');
 
-// Receptionist View (Protected Route)
-Route::get('/receptionist', [VisitorController::class, 'showReceptionistView'])->name('receptionist.view');
-Route::get('/form/fetch/{sessionId}', [VisitorController::class, 'getFormData'])->name('form.fetch');
-Route::get('/form/active-sessions', [VisitorController::class, 'getActiveSessions'])->name('form.active-sessions');
-Route::post('/form/update-receptionist', [VisitorController::class, 'updateFormDataByReceptionist'])->name('form.update-receptionist');
-Route::get('/visitors/export', [VisitorController::class, 'export'])->name('visitors.export');
-Route::post('/visitors/{id}/checkout', [VisitorController::class, 'updateCheckout'])->name('visitors.checkout');
-Route::post('/visitors/{id}/follow-up', [VisitorController::class, 'updateFollowUp'])->name('visitors.follow-up');
-Route::delete('/visitors/{id}', [VisitorController::class, 'destroy'])->name('visitors.destroy');
+// Receptionist-only routes (Protected by receptionist middleware)
+Route::middleware(['auth', 'receptionist'])->group(function () {
+    Route::get('/receptionist', [VisitorController::class, 'showReceptionistView'])->name('receptionist.view');
+    Route::get('/form/fetch/{sessionId}', [VisitorController::class, 'getFormData'])->name('form.fetch');
+    Route::get('/form/active-sessions', [VisitorController::class, 'getActiveSessions'])->name('form.active-sessions');
+    Route::post('/form/update-receptionist', [VisitorController::class, 'updateFormDataByReceptionist'])->name('form.update-receptionist');
+    Route::get('/visitors/export', [VisitorController::class, 'export'])->name('visitors.export');
+    Route::post('/visitors/{id}/checkout', [VisitorController::class, 'updateCheckout'])->name('visitors.checkout');
+    Route::post('/visitors/{id}/follow-up', [VisitorController::class, 'updateFollowUp'])->name('visitors.follow-up');
+    Route::delete('/visitors/{id}', [VisitorController::class, 'destroy'])->name('visitors.destroy');
+});
