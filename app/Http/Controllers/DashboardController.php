@@ -21,7 +21,6 @@ class DashboardController extends Controller
         if ($userRole === 'receptionist') {
             // Get recent visitors for receptionist dashboard
             $visitors = \App\Models\Visitor::orderBy('check_in_time', 'desc')
-                ->take(10)
                 ->get();
                 
             return view('dashboard.receptionist', compact('visitors'));
