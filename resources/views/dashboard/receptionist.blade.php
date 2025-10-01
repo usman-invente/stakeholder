@@ -65,9 +65,9 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                @foreach($visitors ?? [] as $index => $visitor)
+                                                @forelse($visitors as $visitor)
                                                 <tr>
-                                                    <td>{{ $index + 1 }}</td>
+                                                    <td>{{ $visitors->firstItem() + $loop->index }}</td>
                                                     <td>{{ $visitor->full_name }}</td>
                                                     <td>{{ $visitor->contact_number }}</td>
                                                     <td>{{ $visitor->card_no ?? 'N/A' }}</td>
@@ -138,15 +138,24 @@
                                                         </button>
                                                     </td>
                                                 </tr>
-                                                @endforeach
-                                                @if(empty($visitors) || count($visitors) === 0)
+                                                @empty
                                                 <tr>
-                                                    <td colspan="10" class="text-center">No recent visitors</td>
+                                                    <td colspan="11" class="text-center">No recent visitors</td>
                                                 </tr>
-                                                @endif
+                                                @endforelse
                                             </tbody>
                                         </table>
                                     </div>
+                                    
+                                    <!-- Pagination Links -->
+                                    @if($visitors->hasPages())
+                                        <div class="d-flex justify-content-between align-items-center mt-3 px-3">
+                                            <div class="text-muted">
+                                                Showing {{ $visitors->firstItem() ?? 0 }} to {{ $visitors->lastItem() ?? 0 }} of {{ $visitors->total() }} visitors
+                                            </div>
+                                            {{ $visitors->links() }}
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                         </div>

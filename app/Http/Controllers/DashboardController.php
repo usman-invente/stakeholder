@@ -19,9 +19,9 @@ class DashboardController extends Controller
         
         // For receptionist, show a different dashboard
         if ($userRole === 'receptionist') {
-            // Get recent visitors for receptionist dashboard
+            // Get recent visitors for receptionist dashboard with pagination
             $visitors = \App\Models\Visitor::orderBy('check_in_time', 'desc')
-                ->get();
+                ->paginate(20);
                 
             return view('dashboard.receptionist', compact('visitors'));
         }
