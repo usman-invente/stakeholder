@@ -63,7 +63,7 @@
                             
                         @endif
 
-                        @if(Auth::user()->role !== 'receptionist' || Auth::user()->role !== 'contract_creator')
+                        @if(Auth::user()->role !== 'receptionist' && Auth::user()->role !== 'contract_creator')
                         <li>
                                 <a class="dropdown-item py-2" href="{{ route('stakeholder-communications.report') }}">
                                     <i class="fas fa-chart-bar me-2"></i> Monthly Report
