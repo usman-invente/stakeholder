@@ -210,7 +210,7 @@ class ContractController extends Controller
                 $file->move($contractsDir, $uniqueFilename);
                 
                 // Store relative path for database
-                $path = 'contracts/' . $uniqueFilename;
+                $path = 'public/contracts/' . $uniqueFilename;
                 $validated['document_path'] = $path;
 
                 // Track document change
