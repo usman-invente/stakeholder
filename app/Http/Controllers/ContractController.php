@@ -17,17 +17,17 @@ class ContractController extends Controller
     public function dashboard()
     {
         $contracts = Contract::with('department')->latest()->take(10)->get();
-        
+
         // Update contract statuses
         foreach ($contracts as $contract) {
             $contract->updateStatus();
         }
-        
+
         // Storage calculation (in MB)
         $storageUsed = $this->calculateStorageUsed();
         $storageLimit = 1024; // 1GB limit, can be configured
         $storageRemaining = $storageLimit - $storageUsed;
-        
+
         $stats = [
             'total_contracts' => Contract::count(),
             'active_contracts' => Contract::where('status', 'active')->count(),
@@ -37,7 +37,7 @@ class ContractController extends Controller
             'storage_limit' => $storageLimit,
             'storage_remaining' => $storageRemaining,
         ];
-        
+
         return view('contracts.dashboard', compact('contracts', 'stats'));
     }
 
@@ -85,24 +85,24 @@ class ContractController extends Controller
 
         if ($request->hasFile('document')) {
             $file = $request->file('document');
-            
+
             // Generate unique filename to avoid conflicts
             $originalName = $file->getClientOriginalName();
             $extension = $file->getClientOriginalExtension();
             $nameWithoutExtension = pathinfo($originalName, PATHINFO_FILENAME);
             $uniqueFilename = $nameWithoutExtension . '_' . time() . '.' . $extension;
-            
+
             try {
                 // Ensure contracts directory exists in public folder
                 $contractsDir = public_path('contracts');
                 if (!file_exists($contractsDir)) {
                     mkdir($contractsDir, 0755, true);
                 }
-                
+
                 // Move file directly to public/contracts folder
                 $destinationPath = $contractsDir . DIRECTORY_SEPARATOR . $uniqueFilename;
                 $file->move($contractsDir, $uniqueFilename);
-                
+
                 // Store relative path for database
                 $validated['document_path'] = 'contracts/' . $uniqueFilename;
             } catch (\Exception $e) {
@@ -160,9 +160,9 @@ class ContractController extends Controller
 
         foreach ($validated as $field => $newValue) {
             if ($field === 'document') continue; // Skip file upload field
-            
+
             $oldValue = $contract->{$field};
-            
+
             // Handle date comparison properly
             $valuesAreDifferent = false;
             if (in_array($field, ['start_date', 'expiry_date'])) {
@@ -173,12 +173,12 @@ class ContractController extends Controller
             } else {
                 $valuesAreDifferent = $oldValue != $newValue;
             }
-            
+
             if ($valuesAreDifferent) {
                 // Format values for display
                 $displayOldValue = $this->formatValueForDisplay($field, $oldValue);
                 $displayNewValue = $this->formatValueForDisplay($field, $newValue);
-                
+
                 $changes[$field] = [
                     'old' => $displayOldValue,
                     'new' => $displayNewValue
@@ -191,24 +191,24 @@ class ContractController extends Controller
             if ($contract->document_path && file_exists(public_path($contract->document_path))) {
                 unlink(public_path($contract->document_path));
             }
-            
+
             $file = $request->file('document');
             // Generate unique filename to avoid conflicts
             $originalName = $file->getClientOriginalName();
             $extension = $file->getClientOriginalExtension();
             $nameWithoutExtension = pathinfo($originalName, PATHINFO_FILENAME);
             $uniqueFilename = $nameWithoutExtension . '_' . time() . '.' . $extension;
-            
+
             try {
                 // Ensure contracts directory exists in public folder
                 $contractsDir = public_path('contracts');
                 if (!file_exists($contractsDir)) {
                     mkdir($contractsDir, 0755, true);
                 }
-                
+
                 // Move file directly to public/contracts folder
                 $file->move($contractsDir, $uniqueFilename);
-                
+
                 // Store relative path for database
                 $path = 'public/contracts/' . $uniqueFilename;
                 $validated['document_path'] = $path;
@@ -243,9 +243,9 @@ class ContractController extends Controller
         if ($contract->document_path && file_exists(public_path($contract->document_path))) {
             unlink(public_path($contract->document_path));
         }
-        
+
         $contract->delete();
-        
+
         return redirect()->route('contracts.index')->with('success', 'Contract deleted successfully.');
     }
 
@@ -264,14 +264,15 @@ class ContractController extends Controller
      */
     public function downloadDocument(Contract $contract)
     {
-        $filePath = public_path($contract->document_path);
-        
+        $filePath = $contract->document_path;
+
+
         if (!$contract->document_path || !file_exists($filePath)) {
             abort(404, 'Document not found.');
         }
 
         $filename = $contract->contract_id . '_' . basename($contract->document_path);
-        
+
         return response()->download($filePath, $filename);
     }
 
@@ -282,12 +283,12 @@ class ContractController extends Controller
     {
         $year = date('Y');
         $prefix = 'CTR-' . $year . '-';
-        
+
         // Find the highest number for this year
         $lastContract = Contract::where('contract_id', 'like', $prefix . '%')
             ->orderBy('contract_id', 'desc')
             ->first();
-        
+
         if ($lastContract) {
             // Extract number from last contract ID (e.g., CTR-2025-001 -> 001)
             $lastNumber = (int) substr($lastContract->contract_id, -3);
@@ -295,10 +296,10 @@ class ContractController extends Controller
         } else {
             $newNumber = 1;
         }
-        
+
         // Format with leading zeros (001, 002, etc.)
         $formattedNumber = str_pad($newNumber, 3, '0', STR_PAD_LEFT);
-        
+
         return $prefix . $formattedNumber;
     }
 
@@ -309,14 +310,14 @@ class ContractController extends Controller
     {
         $totalSize = 0;
         $contracts = Contract::whereNotNull('document_path')->get();
-        
+
         foreach ($contracts as $contract) {
             $filePath = public_path($contract->document_path);
             if (file_exists($filePath)) {
                 $totalSize += filesize($filePath);
             }
         }
-        
+
         return round($totalSize / 1024 / 1024, 2); // Convert to MB
     }
 
