@@ -47,7 +47,6 @@ class ContractReportsExport implements FromCollection, WithHeadings, WithMapping
                     ->get();
             default:
                 return Contract::with('department')
-                    ->where('status', '!=', 'expired')
                     ->orderBy('expiry_date', 'asc')
                     ->get();
         }

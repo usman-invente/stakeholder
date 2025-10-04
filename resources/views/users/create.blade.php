@@ -45,6 +45,7 @@
                                         <option value="user" {{ old('role') == 'user' ? 'selected' : '' }}>User</option>
                                         <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
                                         <option value="receptionist" {{ old('role') == 'receptionist' ? 'selected' : '' }}>Receptionist</option>
+                                        <option value="contract_creator" {{ old('role') == 'contract_creator' ? 'selected' : '' }}>Contract Creator</option>
                                     </select>
                                     @error('role')
                                         <div class="invalid-feedback">{{ $message }}</div>

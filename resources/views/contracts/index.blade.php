@@ -11,6 +11,9 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">Contract Management</h5>
                         <div>
+                            <a href="{{ route('contracts.reports.export', ['type' => 'all', 'format' => 'excel']) }}" class="btn btn-success me-2">
+                                <i class="fas fa-download me-1"></i> Export All Contracts
+                            </a>
                             <a href="{{ route('contracts.reports') }}" class="btn btn-info me-2">
                                 <i class="fas fa-chart-bar me-1"></i> Reports
                             </a>

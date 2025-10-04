@@ -25,6 +25,11 @@ class DashboardController extends Controller
                 
             return view('dashboard.receptionist', compact('visitors'));
         }
+
+        // redirect contract creators to contracts page
+        if ($userRole === 'contract_creator') {
+            return redirect()->route('contracts.index');
+        }
         
         $isAdmin = $userRole === 'admin';
         $threshold = Setting::getValue('communication_alert_threshold', 30);
