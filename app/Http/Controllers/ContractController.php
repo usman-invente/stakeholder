@@ -84,8 +84,30 @@ class ContractController extends Controller
         }
 
         if ($request->hasFile('document')) {
-            $path = $request->file('document')->store('contracts', 'public');
-            $validated['document_path'] = $path;
+            $file = $request->file('document');
+            
+            // Generate unique filename to avoid conflicts
+            $originalName = $file->getClientOriginalName();
+            $extension = $file->getClientOriginalExtension();
+            $nameWithoutExtension = pathinfo($originalName, PATHINFO_FILENAME);
+            $uniqueFilename = $nameWithoutExtension . '_' . time() . '.' . $extension;
+            
+            try {
+                // Ensure contracts directory exists in public folder
+                $contractsDir = public_path('contracts');
+                if (!file_exists($contractsDir)) {
+                    mkdir($contractsDir, 0755, true);
+                }
+                
+                // Move file directly to public/contracts folder
+                $destinationPath = $contractsDir . DIRECTORY_SEPARATOR . $uniqueFilename;
+                $file->move($contractsDir, $uniqueFilename);
+                
+                // Store relative path for database
+                $validated['document_path'] = 'contracts/' . $uniqueFilename;
+            } catch (\Exception $e) {
+                return redirect()->back()->with('error', 'Failed to upload document: ' . $e->getMessage());
+            }
         }
 
         $contract = Contract::create($validated);
@@ -166,17 +188,39 @@ class ContractController extends Controller
 
         if ($request->hasFile('document')) {
             // Delete old document if exists
-            if ($contract->document_path) {
-                Storage::disk('public')->delete($contract->document_path);
+            if ($contract->document_path && file_exists(public_path($contract->document_path))) {
+                unlink(public_path($contract->document_path));
             }
-            $path = $request->file('document')->store('contracts', 'public');
-            $validated['document_path'] = $path;
             
-            // Track document change
-            $changes['document'] = [
-                'old' => $contract->document_path ? 'Previous document' : 'No document',
-                'new' => 'New document uploaded'
-            ];
+            $file = $request->file('document');
+            // Generate unique filename to avoid conflicts
+            $originalName = $file->getClientOriginalName();
+            $extension = $file->getClientOriginalExtension();
+            $nameWithoutExtension = pathinfo($originalName, PATHINFO_FILENAME);
+            $uniqueFilename = $nameWithoutExtension . '_' . time() . '.' . $extension;
+            
+            try {
+                // Ensure contracts directory exists in public folder
+                $contractsDir = public_path('contracts');
+                if (!file_exists($contractsDir)) {
+                    mkdir($contractsDir, 0755, true);
+                }
+                
+                // Move file directly to public/contracts folder
+                $file->move($contractsDir, $uniqueFilename);
+                
+                // Store relative path for database
+                $path = 'contracts/' . $uniqueFilename;
+                $validated['document_path'] = $path;
+
+                // Track document change
+                $changes['document'] = [
+                    'old' => $contract->document_path ? asset($contract->document_path) : 'No document',
+                    'new' => asset($path)
+                ];
+            } catch (\Exception $e) {
+                return redirect()->back()->with('error', 'Failed to upload document: ' . $e->getMessage());
+            }
         }
 
         $contract->update($validated);
@@ -196,8 +240,8 @@ class ContractController extends Controller
      */
     public function destroy(Contract $contract)
     {
-        if ($contract->document_path) {
-            Storage::disk('public')->delete($contract->document_path);
+        if ($contract->document_path && file_exists(public_path($contract->document_path))) {
+            unlink(public_path($contract->document_path));
         }
         
         $contract->delete();
@@ -220,14 +264,15 @@ class ContractController extends Controller
      */
     public function downloadDocument(Contract $contract)
     {
-        if (!$contract->document_path || !Storage::disk('public')->exists($contract->document_path)) {
+        $filePath = public_path($contract->document_path);
+        
+        if (!$contract->document_path || !file_exists($filePath)) {
             abort(404, 'Document not found.');
         }
 
-        $pathToFile = Storage::disk('public')->path($contract->document_path);
         $filename = $contract->contract_id . '_' . basename($contract->document_path);
         
-        return response()->download($pathToFile, $filename);
+        return response()->download($filePath, $filename);
     }
 
     /**
@@ -266,8 +311,9 @@ class ContractController extends Controller
         $contracts = Contract::whereNotNull('document_path')->get();
         
         foreach ($contracts as $contract) {
-            if (Storage::disk('public')->exists($contract->document_path)) {
-                $totalSize += Storage::disk('public')->size($contract->document_path);
+            $filePath = public_path($contract->document_path);
+            if (file_exists($filePath)) {
+                $totalSize += filesize($filePath);
             }
         }
         
