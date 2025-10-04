@@ -1,7 +1,7 @@
 <div class="bg-dark text-white h-100 sidebar" style="min-width: 250px;">
     <div class="p-3 text-center">
         <div class="bg-white rounded p-2 d-inline-block">
-            <img style="width:200px;height:200px" src="{{asset('public/images/DCG_LOGO.png')}}" alt="DCG Logo" class="img-fluid" style="max-height: 60px; max-width: 100%;">
+            <img style="width:100px;height:100px" src="{{asset('public/images/DCG_LOGO.png')}}" alt="DCG Logo" class="img-fluid" style="max-height: 60px; max-width: 100%;">
         </div>
     </div>
     <ul class="nav flex-column">
