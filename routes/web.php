@@ -22,6 +22,10 @@ Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'inde
     ->middleware(['auth'])
     ->name('dashboard');
 
+Route::get('main/dashboard', [App\Http\Controllers\DashboardController::class, 'mainDashboard'])
+    ->middleware(['auth'])
+    ->name('main.dashboard');
+
 Route::middleware(['auth'])->group(function () {
     // Profile routes
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

@@ -170,9 +170,9 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                @foreach($contracts as $index => $contract)
+                                               @forelse($contracts as $contract)
                                                 <tr>
-                                                    <td>{{ $index + 1 }}</td>
+                                                    <td>{{ $contracts->firstItem() + $loop->index }}</td>
                                                     <td>{{ $contract->contract_id }}</td>
                                                     <td>{{ $contract->supplier_name }}</td>
                                                     <td>{{ $contract->contract_title }}</td>
@@ -203,15 +203,28 @@
                                                         </div>
                                                     </td>
                                                 </tr>
-                                                @endforeach
-                                                @if($contracts->isEmpty())
+                                                @empty
                                                 <tr>
                                                     <td colspan="10" class="text-center">No contracts found</td>
                                                 </tr>
-                                                @endif
+                                                @endforelse
                                             </tbody>
                                         </table>
                                     </div>
+                                    
+                                    <!-- Pagination -->
+                                    @if($contracts->hasPages())
+                                    <div class="d-flex justify-content-between align-items-center mt-3">
+                                        <div>
+                                            <p class="text-muted mb-0">
+                                                Showing {{ $contracts->firstItem() }} to {{ $contracts->lastItem() }} of {{ $contracts->total() }} contracts
+                                            </p>
+                                        </div>
+                                        <div>
+                                            {{ $contracts->links() }}
+                                        </div>
+                                    </div>
+                                    @endif
                                 </div>
                             </div>
                         </div>

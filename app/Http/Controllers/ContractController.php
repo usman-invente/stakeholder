@@ -16,7 +16,14 @@ class ContractController extends Controller
      */
     public function dashboard()
     {
-        $contracts = Contract::with('department')->latest()->take(10)->get();
+        // Get unique contracts by department_id (latest contract per department)
+        $subQuery = Contract::selectRaw('MAX(id) as max_id')
+            ->groupBy('department_id');
+        
+        $contracts = Contract::with('department')
+            ->whereIn('id', $subQuery)
+            ->latest()
+            ->paginate(10);
 
         // Update contract statuses
         foreach ($contracts as $contract) {
@@ -44,10 +51,31 @@ class ContractController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $contracts = Contract::with('department')->latest()->paginate(15);
-        return view('contracts.index', compact('contracts'));
+        // Filter by department if selected
+        if ($request->filled('department_id')) {
+            $contracts = Contract::with('department')
+                ->where('department_id', $request->department_id)
+                ->latest()
+                ->paginate(15)
+                ->appends($request->query());
+        } else {
+            // Get unique contracts by department_id (latest contract per department)
+            $subQuery = Contract::selectRaw('MAX(id) as max_id')
+                ->groupBy('department_id');
+            
+            $contracts = Contract::with('department')
+                ->whereIn('id', $subQuery)
+                ->latest()
+                ->paginate(15)
+                ->appends($request->query());
+        }
+        
+        // Get all departments for filter dropdown
+        $departments = Department::where('is_active', true)->orderBy('name')->get();
+        
+        return view('contracts.index', compact('contracts', 'departments'));
     }
 
     /**

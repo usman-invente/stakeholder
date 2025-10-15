@@ -109,6 +109,9 @@
                                     <td>{{ $department->created_at->format('M d, Y') }}</td>
                                     <td>
                                         <div class="btn-group btn-group-sm normal-actions">
+                                            <a href="{{ route('contracts.index', ['department_id' => $department->id]) }}" class="btn btn-outline-info" title="View Contracts">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
                                             <button type="button" class="btn btn-outline-primary edit-btn" data-department-id="{{ $department->id }}" title="Edit">
                                                 <i class="fas fa-edit"></i>
                                             </button>

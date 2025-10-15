@@ -12,26 +12,17 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
-    public function index()
-    {
-        $user = Auth::user();
-        $userRole = $user->role;
-        
-        // For receptionist, show a different dashboard
-        if ($userRole === 'receptionist') {
-            // Get recent visitors for receptionist dashboard with pagination
-            $visitors = \App\Models\Visitor::orderBy('check_in_time', 'desc')
-                ->paginate(20);
-                
-            return view('dashboard.receptionist', compact('visitors'));
-        }
 
-        // redirect contract creators to contracts page
-        if ($userRole === 'contract_creator') {
-            return redirect()->route('contracts.index');
-        }
+    /**
+     * Display the main dashboard with relevant statistics and notifications.
+     *
+     * @return \Illuminate\View\View
+     */
+    public function mainDashboard(){
+        $user = Auth::user();
+     
         
-        $isAdmin = $userRole === 'admin';
+        $isAdmin = $user->hasRole('admin');
         $threshold = Setting::getValue('communication_alert_threshold', 30);
         $thresholdDate = now()->subDays($threshold);
         
@@ -66,5 +57,71 @@ class DashboardController extends Controller
             'showNotifications',
             'isAdmin'
         ));
+    }
+    public function index()
+    {
+        $user = Auth::user();
+        
+        // For receptionist, show a different dashboard
+        if ($user->hasRole('receptionist')) {
+            // Get recent visitors for receptionist dashboard with pagination
+            $visitors = \App\Models\Visitor::orderBy('check_in_time', 'desc')
+                ->paginate(20);
+                
+            return view('dashboard.receptionist', compact('visitors'));
+        }
+
+        // redirect contract creators (who are not admins) to contracts page
+        if ($user->hasRole('contract_creator') && !$user->hasRole('admin')) {
+            return redirect()->route('contracts.dashboard');
+        }
+        
+        $isAdmin = $user->hasRole('admin');
+        $threshold = Setting::getValue('communication_alert_threshold', 30);
+        $thresholdDate = now()->subDays($threshold);
+        
+        // Get stakeholders without recent communications
+        $stakeholdersNeedingCommunication = Stakeholder::whereDoesntHave('communications', function ($query) use ($thresholdDate) {
+            $query->where('meeting_date', '>=', $thresholdDate);
+        })->get();
+        
+        if ($isAdmin) {
+            // Stats for admin
+            $totalUsers = User::count();
+            $todayUsers = User::whereDate('created_at', today())->count();
+            $recentUsers = User::latest()->take(5)->get();
+            $showUserStats = true;
+            $showNotifications = true;
+        } else {
+            // Stats for regular users
+            $totalUsers = 0;
+            $todayUsers = 0;
+            $recentUsers = collect();
+            $showUserStats = false;
+            $showNotifications = true; // Show notifications for all users
+        }
+
+        return view('dashboard', compact(
+            'stakeholdersNeedingCommunication', 
+            'threshold',
+            'totalUsers',
+            'todayUsers',
+            'recentUsers',
+            'showUserStats',
+            'showNotifications',
+            'isAdmin'
+        ));
+    }
+
+    public function receptionistView()
+    {
+         $user = Auth::user();
+         if ($user->hasRole('receptionist')) {
+            // Get recent visitors for receptionist dashboard with pagination
+            $visitors = \App\Models\Visitor::orderBy('check_in_time', 'desc')
+                ->paginate(20);
+                
+            return view('dashboard.receptionist', compact('visitors'));
+        }
     }
 }

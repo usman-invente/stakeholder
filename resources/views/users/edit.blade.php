@@ -39,18 +39,50 @@
                         </div>
 
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-12">
                                 <div class="mb-3">
-                                    <label for="role" class="form-label">Role</label>
-                                    <select class="form-select @error('role') is-invalid @enderror" id="role" name="role">
-                                        <option value="user" {{ (old('role', $user->role) == 'user') ? 'selected' : '' }}>User</option>
-                                        <option value="admin" {{ (old('role', $user->role) == 'admin') ? 'selected' : '' }}>Admin</option>
-                                        <option value="receptionist" {{ (old('role', $user->role) == 'receptionist') ? 'selected' : '' }}>Receptionist</option>
-                                        <option value="contract_creator" {{ (old('role', $user->role) == 'contract_creator') ? 'selected' : '' }}>Contract Creator</option>
-                                    </select>
-                                    @error('role')
-                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    <label class="form-label">Roles <span class="text-danger">*</span></label>
+                                    @php
+                                        $userRoles = old('roles', is_array($user->roles) ? $user->roles : [$user->role]);
+                                    @endphp
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input @error('roles') is-invalid @enderror" type="checkbox" name="roles[]" value="user" id="role_user" {{ in_array('user', $userRoles) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="role_user">
+                                                    <i class="fas fa-user me-1"></i> User
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input @error('roles') is-invalid @enderror" type="checkbox" name="roles[]" value="admin" id="role_admin" {{ in_array('admin', $userRoles) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="role_admin">
+                                                    <i class="fas fa-user-shield me-1"></i> Admin
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input @error('roles') is-invalid @enderror" type="checkbox" name="roles[]" value="receptionist" id="role_receptionist" {{ in_array('receptionist', $userRoles) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="role_receptionist">
+                                                    <i class="fas fa-concierge-bell me-1"></i> Receptionist
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input @error('roles') is-invalid @enderror" type="checkbox" name="roles[]" value="contract_creator" id="role_contract_creator" {{ in_array('contract_creator', $userRoles) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="role_contract_creator">
+                                                    <i class="fas fa-file-contract me-1"></i> Contract Creator
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @error('roles')
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
+                                    <small class="form-text text-muted">Select one or more roles for this user.</small>
                                 </div>
                             </div>
                         </div>

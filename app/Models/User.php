@@ -20,6 +20,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'roles',
     ];
 
     /**
@@ -42,7 +43,53 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'roles' => 'array',
         ];
+    }
+
+    /**
+     * Check if user has a specific role
+     */
+    public function hasRole($role)
+    {
+        // Check multiple roles first
+        if (is_array($this->roles)) {
+            return in_array($role, $this->roles);
+        }
+        
+        // Fallback to single role for backward compatibility
+        return $this->role === $role;
+    }
+
+    /**
+     * Check if user has any of the specified roles
+     */
+    public function hasAnyRole($roles)
+    {
+        if (!is_array($roles)) {
+            $roles = [$roles];
+        }
+        
+        foreach ($roles as $role) {
+            if ($this->hasRole($role)) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    /**
+     * Get user's roles as array
+     */
+    public function getUserRoles()
+    {
+        if (is_array($this->roles)) {
+            return $this->roles;
+        }
+        
+        // Fallback to single role
+        return $this->role ? [$this->role] : [];
     }
 
     // Add the many-to-many relationship with communications

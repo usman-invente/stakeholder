@@ -15,7 +15,7 @@
                         <i class="fas fa-tachometer-alt me-2"></i> Dashboard
                     </a>
                 </li>
-                @if(Auth::user()->role === 'admin')
+                @if(Auth::user()->hasRole('admin'))
                 <li class="nav-item">
                     <a class="nav-link {{ Request::is('users*') ? 'active' : '' }}" href="{{ route('users.index') }}">
                         <i class="fas fa-users me-2"></i> Users
@@ -42,7 +42,7 @@
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="navbarDropdown" style="min-width: 200px;">
                         
-                        @if(Auth::user()->role === 'admin')
+                        @if(Auth::user()->hasRole('admin'))
                             <li>
                                 <a class="dropdown-item py-2" href="{{ route('settings.index') }}">
                                     <i class="fas fa-cogs me-2"></i> System Settings
@@ -53,17 +53,17 @@
                                     <i class="fas fa-users me-2"></i> Manage Users
                                 </a>
                             </li>
-                            @if(Auth::user()->role === 'receptionist')
+                        @endif
+                        
+                        @if(Auth::user()->hasAnyRole(['admin', 'user']))
                             <li>
                                 <a class="dropdown-item py-2" href="{{ route('stakeholders.index') }}">
                                     <i class="fas fa-handshake me-2"></i> Manage Stakeholders
                                 </a>
                             </li>
-                            @endif
-                            
                         @endif
 
-                        @if(Auth::user()->role !== 'receptionist' && Auth::user()->role !== 'contract_creator')
+                        @if(Auth::user()->hasAnyRole(['admin', 'user']))
                         <li>
                                 <a class="dropdown-item py-2" href="{{ route('stakeholder-communications.report') }}">
                                     <i class="fas fa-chart-bar me-2"></i> Monthly Report

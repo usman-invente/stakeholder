@@ -17,7 +17,7 @@ class ReceptionistMiddleware
      */
     public function handle(Request $request, Closure $next)
     {
-        if (Auth::check() && Auth::user()->role === 'receptionist') {
+        if (Auth::check() && Auth::user()->hasRole('receptionist')) {
             return $next($request);
         }
 

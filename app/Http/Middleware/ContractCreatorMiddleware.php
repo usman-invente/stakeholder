@@ -24,7 +24,7 @@ class ContractCreatorMiddleware
         $user = Auth::user();
         
         // Allow access for admin and contract_creator roles
-        if ($user->role === 'admin' || $user->role === 'contract_creator') {
+        if ($user->hasAnyRole(['admin', 'contract_creator'])) {
             return $next($request);
         }
 

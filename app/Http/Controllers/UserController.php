@@ -26,16 +26,21 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'role' => 'required|in:user,admin,receptionist,contract_creator',
+            'roles' => 'nullable|array',
+            'roles.*' => 'in:user,admin,receptionist,contract_creator',
             'stakeholders' => 'nullable|array',
             'stakeholders.*' => 'exists:stakeholders,id',
         ]);
 
+        // Handle empty roles - default to 'user' if no roles selected
+        $roles = $validated['roles'] ?? [''];
+        
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => bcrypt($validated['password']),
-            'role' => $validated['role'],
+            'roles' => $roles,
+           
         ]);
         
         // Attach stakeholders if selected
@@ -58,7 +63,8 @@ class UserController extends Controller
         $rules = [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'role' => 'required|in:user,admin,receptionist,contract_creator',
+            'roles' => 'required|array|min:1',
+            'roles.*' => 'in:user,admin,receptionist,contract_creator',
             'stakeholders' => 'nullable|array',
             'stakeholders.*' => 'exists:stakeholders,id',
         ];
@@ -79,6 +85,9 @@ class UserController extends Controller
         
         // Remove stakeholders from validated data before updating user
         unset($validated['stakeholders']);
+        
+        // Add backward compatibility for single role
+        $validated['role'] = $validated['roles'][0];
         
         $user->update($validated);
         

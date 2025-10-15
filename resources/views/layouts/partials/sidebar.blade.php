@@ -5,7 +5,12 @@
         </div>
     </div>
     <ul class="nav flex-column">
-        @if(Auth::user()->role === 'receptionist')
+        @if(Auth::user()->hasRole('receptionist'))
+        <!-- Receptionist Section -->
+        <li class="nav-item mt-2 mb-2">
+            <hr class="text-white-50">
+            <small class="text-white-50 px-3"><i class="fas fa-concierge-bell me-1"></i> Visitor Management</small>
+        </li>
         <li class="nav-item">
             <a class="nav-link text-white {{ Request::is('dashboard') ? 'active bg-primary' : '' }}" href="{{ route('dashboard') }}">
                 <i class="fas fa-tachometer-alt me-2"></i> <span class="nav-text">Receptionist Dashboard</span>
@@ -21,16 +26,27 @@
                 <i class="fas fa-user-plus me-2"></i> <span class="nav-text">New Visitor Registration</span>
             </a>
         </li>
+        @endif
 
-        @else
-        @if(Auth::user()->role === 'admin' || Auth::user()->role === 'user')
+        @if(Auth::user()->hasAnyRole(['admin', 'user']))
+        <!-- Main Dashboard -->
+        <li class="nav-item mt-2 mb-2">
+            <hr class="text-white-50">
+            <small class="text-white-50 px-3"><i class="fas fa-home me-1"></i> Main Dashboard</small>
+        </li>
         <li class="nav-item">
-            <a class="nav-link text-white {{ Request::is('dashboard') ? 'active bg-primary' : '' }}" href="{{ route('dashboard') }}">
+            <a class="nav-link text-white {{ Request::is('main/dashboard') ? 'active bg-primary' : '' }}" href="{{ route('main.dashboard') }}">
                 <i class="fas fa-tachometer-alt me-2"></i> <span class="nav-text">Dashboard</span>
             </a>
         </li>
         @endif
-        @if(Auth::user()->role === 'admin')
+        
+        @if(Auth::user()->hasRole('admin'))
+        <!-- System Administration -->
+        <li class="nav-item mt-3 mb-2">
+            <hr class="text-white-50">
+            <small class="text-white-50 px-3"><i class="fas fa-user-shield me-1"></i> System Administration</small>
+        </li>
         <li class="nav-item">
             <a class="nav-link text-white {{ Request::is('users*') ? 'active bg-primary' : '' }}" href="{{ route('users.index') }}">
                 <i class="fas fa-users me-2"></i> <span class="nav-text">Users</span>
@@ -38,7 +54,12 @@
         </li>
         @endif
 
-        @if(Auth::user()->role === 'admin' || Auth::user()->role === 'user')
+        @if(Auth::user()->hasAnyRole(['admin', 'user']))
+        <!-- Stakeholder Management -->
+        <li class="nav-item mt-3 mb-2">
+            <hr class="text-white-50">
+            <small class="text-white-50 px-3"><i class="fas fa-handshake me-1"></i> Stakeholder Management</small>
+        </li>
         <li class="nav-item">
             <a class="nav-link text-white {{ Request::is('stakeholders*') ? 'active bg-primary' : '' }}" href="{{ route('stakeholders.index') }}">
                 <i class="fas fa-handshake me-2"></i> <span class="nav-text">Stakeholders</span>
@@ -51,17 +72,26 @@
             </a>
         </li>
         @endif
-        @if(Auth::user()->role === 'admin')
+        
+        @if(Auth::user()->hasAnyRole(['admin']))
+        <!-- Contract Management -->
+        <li class="nav-item mt-3 mb-2">
+            <hr class="text-white-50">
+            <small class="text-white-50 px-3"><i class="fas fa-file-contract me-1"></i> Contract Management</small>
+        </li>
         <li class="nav-item">
             <a class="nav-link text-white {{ Request::is('contracts*') ? 'active bg-primary' : '' }}" href="{{ route('contracts.dashboard') }}">
                 <i class="fas fa-file-contract me-2"></i> <span class="nav-text">Contract Management</span>
             </a>
         </li>
         @endif
-        @endif
 
-        @if(Auth::user()->role === 'contract_creator')
-        <!-- Contract Creator Menu Section -->
+        @if(Auth::user()->hasRole('contract_creator') && !Auth::user()->hasRole('admin'))
+        <!-- Contract Creator Dashboard -->
+        <li class="nav-item mt-2 mb-2">
+            <hr class="text-white-50">
+            <small class="text-white-50 px-3"><i class="fas fa-file-contract me-1"></i> Contract Creator</small>
+        </li>
          <li class="nav-item">
             <a class="nav-link text-white {{ Request::is('contracts/dashboard') ? 'active bg-primary' : '' }}" href="{{ route('contracts.dashboard') }}">
                 <i class="fas fa-chart-pie me-2"></i> <span class="nav-text">Dashboard</span>
@@ -134,7 +164,7 @@
     </div>
 </div>
 
-@if(Auth::user()->role === 'contract_creator')
+@if(Auth::user()->hasRole('contract_creator'))
 <script>
     function generateContractId() {
         // Show loading state

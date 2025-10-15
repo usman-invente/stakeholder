@@ -31,6 +31,45 @@
                         </div>
                     @endif
 
+                    <!-- Filter Section -->
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <form method="GET" action="{{ route('contracts.index') }}" class="d-flex align-items-end gap-3">
+                                <div class="flex-grow-1">
+                                    <label for="department_id" class="form-label">Filter by Department</label>
+                                    <select name="department_id" id="department_id" class="form-select">
+                                        <option value="">All Departments</option>
+                                        @foreach($departments as $department)
+                                            <option value="{{ $department->id }}" {{ request('department_id') == $department->id ? 'selected' : '' }}>
+                                                {{ $department->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-filter me-1"></i>Filter
+                                    </button>
+                                </div>
+                                @if(request('department_id'))
+                                <div>
+                                    <a href="{{ route('contracts.index') }}" class="btn btn-outline-secondary">
+                                        <i class="fas fa-times me-1"></i>Clear
+                                    </a>
+                                </div>
+                                @endif
+                            </form>
+                        </div>
+                    </div>
+
+                    @if(request('department_id'))
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Showing contracts for: <strong>{{ $departments->find(request('department_id'))->name ?? 'Unknown Department' }}</strong>
+                        ({{ $contracts->total() }} contract{{ $contracts->total() !== 1 ? 's' : '' }} found)
+                    </div>
+                    @endif
+
                     <div class="table-responsive">
                         <table class="table table-striped">
                             <thead>
@@ -48,9 +87,9 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($contracts as $index => $contract)
+                                @forelse($contracts as $contract)
                                 <tr>
-                                    <td>{{ ($contracts->currentPage() - 1) * $contracts->perPage() + $index + 1 }}</td>
+                                    <td>{{ $contracts->firstItem() + $loop->index }}</td>
                                     <td>{{ $contract->contract_id }}</td>
                                     <td>{{ $contract->supplier_name }}</td>
                                     <td>{{ $contract->contract_title }}</td>
@@ -92,20 +131,28 @@
                                         </div>
                                     </td>
                                 </tr>
-                                @endforeach
-                                @if($contracts->isEmpty())
+                                @empty
                                 <tr>
                                     <td colspan="10" class="text-center">No contracts found</td>
                                 </tr>
-                                @endif
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
 
                     <!-- Pagination -->
-                    <div class="d-flex justify-content-center">
-                        {{ $contracts->links() }}
+                    @if($contracts->hasPages())
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div>
+                            <p class="text-muted mb-0">
+                                Showing {{ $contracts->firstItem() }} to {{ $contracts->lastItem() }} of {{ $contracts->total() }} contracts
+                            </p>
+                        </div>
+                        <div>
+                            {{ $contracts->links() }}
+                        </div>
                     </div>
+                    @endif
                 </div>
             </div>
         </div>
