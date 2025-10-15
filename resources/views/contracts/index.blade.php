@@ -70,6 +70,8 @@
                     </div>
                     @endif
 
+                    @if(request('department_id'))
+                    <!-- Show contracts for selected department -->
                     <div class="table-responsive">
                         <table class="table table-striped">
                             <thead>
@@ -78,7 +80,6 @@
                                     <th>Contract ID</th>
                                     <th>Supplier Name</th>
                                     <th>Contract Title</th>
-                                    <th>Department</th>
                                     <th>Start Date</th>
                                     <th>Expiry Date</th>
                                     <th>Value</th>
@@ -93,7 +94,6 @@
                                     <td>{{ $contract->contract_id }}</td>
                                     <td>{{ $contract->supplier_name }}</td>
                                     <td>{{ $contract->contract_title }}</td>
-                                    <td>{{ $contract->department->name ?? 'N/A' }}</td>
                                     <td>{{ $contract->start_date->format('M d, Y') }}</td>
                                     <td>{{ $contract->expiry_date->format('M d, Y') }}</td>
                                     <td>
@@ -133,15 +133,64 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="10" class="text-center">No contracts found</td>
+                                    <td colspan="9" class="text-center">No contracts found for this department</td>
                                 </tr>
                                 @endforelse
                             </tbody>
                         </table>
                     </div>
+                    @else
+                    <!-- Show departments with contract count -->
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Department Name</th>
+                                    <th>Total Contracts</th>
+                                    <th>Active Contracts</th>
+                                    <th>Expiring Contracts</th>
+                                    <th>Expired Contracts</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($departments->filter(function($dept) { return $dept->contracts_count > 0; }) as $department)
+                                <tr>
+                                    <td>{{ $loop->iteration }}</td>
+                                    <td>{{ $department->name }}</td>
+                                    <td>
+                                        <span class="badge bg-primary">{{ $department->contracts_count }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success">{{ $department->active_contracts_count ?? 0 }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-warning">{{ $department->expiring_contracts_count ?? 0 }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-danger">{{ $department->expired_contracts_count ?? 0 }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{{ route('contracts.index', ['department_id' => $department->id]) }}" class="btn btn-outline-info" title="View All Contracts">
+                                                <i class="fas fa-eye"></i> View Contracts
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="7" class="text-center">No departments with contracts found</td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                    @endif
 
                     <!-- Pagination -->
-                    @if($contracts->hasPages())
+                    @if(request('department_id') && $contracts->hasPages())
                     <div class="d-flex justify-content-between align-items-center mt-3">
                         <div>
                             <p class="text-muted mb-0">

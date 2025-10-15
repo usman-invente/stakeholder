@@ -60,20 +60,30 @@ class ContractController extends Controller
                 ->latest()
                 ->paginate(15)
                 ->appends($request->query());
-        } else {
-            // Get unique contracts by department_id (latest contract per department)
-            $subQuery = Contract::selectRaw('MAX(id) as max_id')
-                ->groupBy('department_id');
             
-            $contracts = Contract::with('department')
-                ->whereIn('id', $subQuery)
-                ->latest()
-                ->paginate(15)
-                ->appends($request->query());
+            // Get all departments for filter dropdown
+            $departments = Department::where('is_active', true)->orderBy('name')->get();
+        } else {
+            // Show departments with contract counts
+            $contracts = collect(); // Empty collection for departments view
+            
+            // Get departments with contract counts
+            $departments = Department::where('is_active', true)
+                ->withCount([
+                    'contracts as contracts_count',
+                    'contracts as active_contracts_count' => function ($query) {
+                        $query->where('status', 'active');
+                    },
+                    'contracts as expiring_contracts_count' => function ($query) {
+                        $query->where('status', 'expiring');
+                    },
+                    'contracts as expired_contracts_count' => function ($query) {
+                        $query->where('status', 'expired');
+                    }
+                ])
+                ->orderBy('name')
+                ->get();
         }
-        
-        // Get all departments for filter dropdown
-        $departments = Department::where('is_active', true)->orderBy('name')->get();
         
         return view('contracts.index', compact('contracts', 'departments'));
     }
